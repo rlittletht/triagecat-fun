@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
+using TCore.Logging;
+using tt.Executors;
 
 namespace triagecat_fun;
 
@@ -15,13 +16,23 @@ public class Function1
     }
 
     [Function("Function1")]
-    public IActionResult Run(
+    public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Function1")]
-        HttpRequest req,
+        HttpRequestData req,
         FunctionContext context,
         ILogger? log)
     {
         log?.LogInformation("C# HTTP trigger function processed a request.");
-        return new OkObjectResult("Welcome to Azure Functions!");
+
+        return await Executor.ExecuteGet<string>(
+            req,
+            context,
+            new CorrelationID(),
+            log,
+            async _context =>
+            {
+                // Your logic here
+                return "Hello from Function1!";
+            });
     }
 }
