@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "triagecat_fun": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7209",
+      "launchBrowser": false
+    }
+  }
+}
