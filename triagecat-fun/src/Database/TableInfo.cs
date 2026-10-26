@@ -1,6 +1,6 @@
 ﻿using TCore.SqlCore;
 
-namespace tr.Database;
+namespace tt.Database;
 
 public class TableInfo
 {

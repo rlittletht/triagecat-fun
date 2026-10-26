@@ -1,0 +1,79 @@
+using System.Data.SQLite;
+using TCore.SqlCore;
+using TCore.SQLiteClient;
+using tt.Controllers;
+
+namespace tt.Database.SQLiteDatabase;
+
+public class CreateDatabase
+{
+    /*----------------------------------------------------------------------------
+        %%Function: CreateAuthTable
+        %%Qualified: tt.Database.SQLiteDatabase.CreateDatabase.CreateAuthTable
+
+        Create the auth table and prepopulate with the root user
+        (password is testing123)
+    ----------------------------------------------------------------------------*/
+    static void CreateAuthTable(ISql connection)
+    {
+        connection.ExecuteNonQuery(
+            "CREATE TABLE tt_auth ("
+            + "email NVARCHAR(128) NOT NULL PRIMARY KEY,"
+            + "password NVARCHAR(128) NOT NULL,"
+            + "userid VARCHAR(36) NOT NULL);");
+
+        SqlCommandTextInit cmdtext = new("INSERT INTO tt_auth (email, password, userid) VALUES (@email, @password, @userid)");
+
+        connection.ExecuteNonQuery(
+            cmdtext,
+            cmd =>
+            {
+                cmd.AddParameterWithValue("@email", "blue@traynrex.com");
+                cmd.AddParameterWithValue("@password", "$2a$11$LcsP0vNs02sdfwKcIYj7FuKM7BRlB61zxKfzjFxrAhFbNgNZcIeLO");
+                cmd.AddParameterWithValue("@userid", SQLiteDatabase.s_rootUserId);
+            });
+    }
+
+    /*----------------------------------------------------------------------------
+        %%Function: CreateTriageTable
+        %%Qualified: tt.Database.SQLiteDatabase.CreateDatabase.CreateTriageTable
+
+        also prepopulate the claims for the root user
+    ----------------------------------------------------------------------------*/
+    static void CreateTriageTable(ISql connection)
+    {
+        connection.ExecuteNonQuery(
+            "CREATE TABLE tt_triage ("
+            + "assetid VARCHAR(36) NOT NULL,"
+            + "path VARCHAR(1024) NOT NULL,"
+            + "notes VARCHAR(1024) NOT NULL,"
+            + "PRIMARY KEY('assetid'));");
+    }
+
+    /*----------------------------------------------------------------------------
+        %%Function: CreateNewDatabase
+        %%Qualified: tt.Database.SQLiteDatabase.CreateDatabase.CreateNewDatabase
+    ----------------------------------------------------------------------------*/
+    public static ISql CreateNewDatabase(string database)
+    {
+        SQLiteConnection.CreateFile(database);
+
+        SQLite connection = SQLiteDatabase.OpenDatabase(database);
+
+        CreateAuthTable(connection);
+        CreateTriageTable(connection);
+
+        return connection;
+    }
+
+    static bool IsTableDefined(ISql connection, string table)
+    {
+        TableInfo info = TableInfo.CreateTableInfo(connection, table);
+
+        return !info.IsEmpty;
+    }
+
+    public static void ConvertDatabaseAsNeeded(ISql connection)
+    {
+    }
+}

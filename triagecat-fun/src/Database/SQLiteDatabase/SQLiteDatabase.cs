@@ -38,5 +38,10 @@ public class SQLiteDatabase : IRexDatabase
         return connection;
     }
 
+    public List<AuthUserEx> GetAuthAndClaimsForEmail(CorrelationID crid, string email) =>
+        SqlShared.Auth.GetAuthAndClaimsForEmail(m_connection, crid, email);
+
+    public void UpdatePasswordForUser(CorrelationID crid, string email, string newPasswordHash) =>
+        SqlShared.Auth.UpdatePasswordForUser(m_connection, crid, email, newPasswordHash);
 
 }

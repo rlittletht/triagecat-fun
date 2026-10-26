@@ -2,6 +2,7 @@
 using TCore.Logging;
 using TCore.SqlClient;
 using TCore.SqlCore;
+using tt.Types.Model.Users;
 
 namespace tt.Database.Sql;
 
@@ -18,6 +19,12 @@ public class SqlDatabase: IRexDatabase
     {
         return new LocalSqlHolder(null, crid, m_connectionString);
     }
+
+    public List<AuthUserEx> GetAuthAndClaimsForEmail(CorrelationID crid, string email) =>
+        Invoke(SqlShared.Auth.GetAuthAndClaimsForEmail, this, crid, email);
+
+    public void UpdatePasswordForUser(CorrelationID crid, string email, string newPasswordHash) =>
+        VoidInvoke(SqlShared.Auth.UpdatePasswordForUser, this, crid, email, newPasswordHash);
 
     #region Generic Invoke
     // Generic Invocations

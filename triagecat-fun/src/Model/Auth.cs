@@ -44,7 +44,6 @@ public class Auth
         returnClaims.Add(new Claim(ClaimTypes.Name, firstAuthUserEx.DisplayName));
         returnClaims.Add(new Claim(ClaimTypes.Email, firstAuthUserEx.Email));
         returnClaims.Add(new Claim(ClaimTypes.NameIdentifier, firstAuthUserEx.UserId.ToString()));
-        returnClaims.Add(new Claim(TrClaimTypes.GroupId, firstAuthUserEx.GroupId.ToString()));
 
         expires = DateTime.UtcNow.AddDays(14);
 
@@ -79,7 +78,7 @@ public class Auth
 
         List<AuthUserEx> authAndClaims;
 
-        authAndClaims = Session.RexDatabase.GetAuthAndClaimsForEmailAndGroup(crid, login.Email, groupId);
+        authAndClaims = Session.RexDatabase.GetAuthAndClaimsForEmail(crid, login.Email);
 
         AuthUserEx firstAuthUserEx = authAndClaims[0];
 
@@ -91,130 +90,6 @@ public class Auth
         // to build the list of claims
 
         return BuildLoginResultFromAuthAndClaimsList(authAndClaims, out jwt, out expires);
-    }
-
-
-    /*----------------------------------------------------------------------------
-        %%Function: SwitchToGroup
-        %%Qualified: tr.Model.Auth.SwitchToGroup
-    ----------------------------------------------------------------------------*/
-    public static LoginResult SwitchToGroup(
-        CorrelationID crid, ILogger? logger, string email, Guid newGroupId, out string? jwt, out DateTime? expires)
-    {
-        List<AuthUserEx> authAndClaims = Session.RexDatabase.GetAuthAndClaimsForEmailAndGroup(crid, email, newGroupId);
-
-        if (authAndClaims.Count == 0)
-            throw new TtExceptionUnauthorized("user does not belong to the group");
-
-        return BuildLoginResultFromAuthAndClaimsList(authAndClaims, out jwt, out expires);
-    }
-
-    /*----------------------------------------------------------------------------
-        %%Function: GetAuthInfoFromUserAndGroup
-        %%Qualified: tr.Model.Auth.GetAuthInfoFromUserAndGroup
-    ----------------------------------------------------------------------------*/
-    public static LoginResult GetAuthInfoFromUserAndGroup(CorrelationID crid, ILogger? logger, Guid userId, Guid groupId, ImmutableList<Claim> claims)
-    {
-        return BuildLoginResult(claims, Session.RexDatabase.GetAuthInfoFromUserAndGroup(crid, userId, groupId));
-    }
-
-    /*----------------------------------------------------------------------------
-        %%Function: CleanupTestUserAndGroup
-        %%Qualified: tr.Model.Auth.CleanupTestUserAndGroup
-    ----------------------------------------------------------------------------*/
-    public static void CleanupTestUserAndGroup(CorrelationID crid, ILogger? logger, Guid userId, IReadOnlyCollection<Guid> groupIds)
-    {
-        Session.RexDatabase.DeleteUserFromEverything(crid, userId);
-        foreach (Guid groupId in groupIds)
-        {
-            Session.RexDatabase.DeleteGroup(crid, groupId);
-        }
-    }
-
-    /*----------------------------------------------------------------------------
-        %%Function: CreateTestUserAndGroup
-        %%Qualified: tr.Model.Auth.CreateTestUserAndGroup
-
-        The new user will be associated with the rex root group (and have all
-        claims)
-
-        Two new groups will be created:
-            * groupIdForOwnAndOther - user will have all claims for this group
-            * groupIdForOwnOnly - user will have read claims for this group
-    ----------------------------------------------------------------------------*/
-    public static CreateTestResult CreateTestUserAndGroup(CorrelationID crid, ILogger? logger, UserProfile profile, out string? jwt, out DateTime? expires)
-    {
-        DateTime now = DateTime.UtcNow;
-        Guid? groupIdForOwnAndOther = null;
-        Guid? groupIdForOwnOnly = null;
-        Guid? userId = null;
-
-        try
-        {
-            groupIdForOwnAndOther = Session.RexDatabase.CreateGroup(crid, "Test Group for Own/Other", $"Created {now}");
-            groupIdForOwnOnly = Session.RexDatabase.CreateGroup(crid, "Test Group for Own Only", $"Created {now}");
-
-            CreateParams createParams =
-                new()
-                {
-                    Email = $"test{groupIdForOwnAndOther.ToString()}@test.traynrex.com",
-                    Password = Guid.NewGuid().ToString() // we don't ever want to know this
-                };
-
-            Users.ValidateUserCreateParamsAndHashPassword(createParams);
-
-            CreateNewUserAndGroupResult createResult = Session.RexDatabase.CreateNewUserWithProfileInGroup(
-                crid,
-                createParams.Email,
-                createParams.Password,
-                profile,
-                TrClaimTypes.s_RexGroupId,
-                true /*canWritePeople*/,
-                true /*canWriteGroups*/,
-                false/*createOneTimeKey*/);
-
-            userId = createResult.UserId;
-
-            string claimsOwnOnly = string.Join(",", [TrClaimTypes.Access_WriteOwn, TrClaimTypes.Access_ReadOwn, TrClaimTypes.Access_ManageOwn]);
-            string claimsOwnAndOther = string.Join(",", [TrClaimTypes.Access_WriteOwn, TrClaimTypes.Access_ReadOwn, TrClaimTypes.Access_WriteOther,
-                TrClaimTypes.Access_ReadOther, TrClaimTypes.Access_ManageOwn]);
-
-
-            CreateTestResult result = new CreateTestResult()
-            {
-                Email = createParams.Email,
-                UserId = userId.Value,
-                GroupIdForOwnAndOther = groupIdForOwnAndOther.Value,
-                GroupIdForOwnOnly = groupIdForOwnOnly.Value
-            };
-
-            // join the new user to the new groups
-            Session.RexDatabase.AddUserIdToGroupWithAccessClaims(crid, userId.Value, groupIdForOwnAndOther.Value, true, true);
-            Session.RexDatabase.AddUserIdToGroupWithAccessClaims(crid, userId.Value, groupIdForOwnOnly.Value, true, true);
-
-            // update the claims to exactly what we want
-            Session.RexDatabase.SetOrUpdateClaimsForUser(crid, userId.Value, groupIdForOwnAndOther.Value, TrClaimTypes.GroupAccess, claimsOwnAndOther);
-            Session.RexDatabase.SetOrUpdateClaimsForUser(crid, userId.Value, groupIdForOwnOnly.Value, TrClaimTypes.GroupAccess, claimsOwnOnly);
-
-            // and lastly, login to the test account in the rex root group
-            SwitchToGroup(crid, logger, result.Email, TrClaimTypes.s_RexGroupId, out jwt, out expires);
-
-            return result;
-        }
-        catch (Exception)
-        {
-            // cleanup
-            if (userId != null)
-                Session.RexDatabase.DeleteUserFromEverything(crid, userId.Value);
-
-            if (groupIdForOwnAndOther != null)
-                Session.RexDatabase.DeleteGroup(crid, groupIdForOwnAndOther.Value);
-
-            if (groupIdForOwnOnly != null)
-                Session.RexDatabase.DeleteGroup(crid, groupIdForOwnOnly.Value);
-
-            throw;
-        }
     }
 
     /*----------------------------------------------------------------------------
@@ -231,7 +106,7 @@ public class Auth
 
         if (!string.IsNullOrEmpty(oldPassword))
         {
-            List<AuthUserEx> authUsers = Session.RexDatabase.GetAuthAndClaimsForEmailAndGroup(crid, email, null);
+            List<AuthUserEx> authUsers = Session.RexDatabase.GetAuthAndClaimsForEmail(crid, email);
 
             if (authUsers.Count == 0)
                 throw new TtExceptionUnauthorized("user not found");

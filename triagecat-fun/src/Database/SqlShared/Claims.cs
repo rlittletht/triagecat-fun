@@ -1,10 +1,10 @@
 ﻿using TCore.Logging;
 using TCore.SqlClient;
 using TCore.SqlCore;
-using tr.Database.SqlShared;
-using tr.Types.Model;
+using tt.Database.SqlShared;
+using tt.Types.Model;
 
-namespace tr.Database.SqlShared;
+namespace tt.Database.SqlShared;
 
 public class Claims
 {

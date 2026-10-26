@@ -2,13 +2,27 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using tt.Database;
+using tt.Model;
+using tt.Middleware;
 
-var builder = FunctionsApplication.CreateBuilder(args);
+string rawKey = System.Environment.GetEnvironmentVariable("TraynrexBlue.SigningKey") ?? "";
 
-builder.ConfigureFunctionsWebApplication();
+tt.Model.Auth.Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(rawKey));
+tt.Model.Auth.Issuer = System.Environment.GetEnvironmentVariable("TraynrexBlue.Issuer") ?? "";
+tt.Model.Auth.Audience = System.Environment.GetEnvironmentVariable("TraynrexBlue.Audience") ?? "";
 
-builder.Services
-   .AddApplicationInsightsTelemetryWorkerService()
-   .ConfigureFunctionsApplicationInsights();
+Session.RexDatabase = RexDatabase.InitializeFromEnvironment(
+    System.Environment.GetEnvironmentVariable("DatabaseSource") ?? "Must SqlServer | SQLite");
 
-builder.Build().Run();
+var host = new HostBuilder()
+   .ConfigureFunctionsWorkerDefaults(builder =>
+                                     {
+                                         builder.UseMiddleware<FetchOptions>();
+                                         builder.UseMiddleware<JwtValidation>();
+                                     })
+   .Build();
+
+host.Run();

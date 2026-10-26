@@ -5,7 +5,7 @@ using tt.Database.SqlShared;
 using tt.Types.Model;
 using tt.Types.Model.Users;
 
-namespace tr.Database.SqlShared;
+namespace tt.Database.SqlShared;
 
 public class Auth
 {
@@ -15,16 +15,14 @@ public class Auth
         });
 
     /*----------------------------------------------------------------------------
-        %%Function: GetAuthAndClaimsForEmailAndGroup
-        %%Qualified: tr.Database.SqlShared.Auth.GetAuthAndClaimsForEmailAndGroup
+        %%Function: GetAuthAndClaimsForEmail
+        %%Qualified: tr.Database.SqlShared.Auth.GetAuthAndClaimsForEmail
     ----------------------------------------------------------------------------*/
-    public static List<AuthUserEx> GetAuthAndClaimsForEmailAndGroup(ISql sql, CorrelationID crid, string email, Guid? groupId)
+    public static List<AuthUserEx> GetAuthAndClaimsForEmail(ISql sql, CorrelationID crid, string email)
     {
         // validate the user
         SqlSelect select = new(TtSql.s_SelectBase_AuthUserEx);
         select.Where.Add("email = @email", SqlWhere.Op.And);
-        if (groupId != null)
-            select.Where.Add("$$tr_usergroupsmap$$.groupId = @groupId", SqlWhere.Op.And);
 
         return sql.ExecuteDelegatedQuery(
             crid,
@@ -77,7 +75,7 @@ public class Auth
         %%Function: GetAuthInfoFromUserAndGroup
         %%Qualified: tt.Database.SqlShared.Auth.GetAuthInfoFromUserAndGroup
     ----------------------------------------------------------------------------*/
-    public static AuthUserEx GetAuthInfoFromUserAndGroup(ISql sql, CorrelationID crid, Guid userId)
+    public static AuthUserEx GetAuthInfoFromUser(ISql sql, CorrelationID crid, Guid userId)
     {
         // validate the user
         SqlSelect select = new(TtSql.s_SelectBase_AuthUserEx);

@@ -1,16 +1,15 @@
 ﻿using TCore.Logging;
 using TCore.SqlCore;
-using tr.Database.SqlShared;
-using tr.Types.Model.Users;
-using tr.Model;
+using tt.Database.SqlShared;
+using tt.Types.Model.Users;
+using tt.Model;
 using TCore.SqlClient;
-using tr.Controllers;
+using tt.Controllers;
 using System.Reflection.Emit;
 using System.Diagnostics.Metrics;
-using Microsoft.Graph.Models;
-using tr.Types.Model;
+using tt.Types.Model;
 
-namespace tr.Database.SqlShared;
+namespace tt.Database.SqlShared;
 
 public class Users
 {

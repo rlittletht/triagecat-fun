@@ -15,9 +15,13 @@ public class Function1
     }
 
     [Function("Function1")]
-    public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
+    public IActionResult Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Function1")]
+        HttpRequest req,
+        FunctionContext context,
+        ILogger? log)
     {
-        _logger.LogInformation("C# HTTP trigger function processed a request.");
+        log?.LogInformation("C# HTTP trigger function processed a request.");
         return new OkObjectResult("Welcome to Azure Functions!");
     }
 }

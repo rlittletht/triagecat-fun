@@ -12,7 +12,6 @@ using TCore.Exceptions;
 using TCore.Logging;
 using tt.Types.Model;
 using tt.Extensions;
-using tt.Types.Model;
 
 namespace tt.Executors;
 
