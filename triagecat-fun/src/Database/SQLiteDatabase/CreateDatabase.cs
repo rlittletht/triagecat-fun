@@ -75,5 +75,9 @@ public class CreateDatabase
 
     public static void ConvertDatabaseAsNeeded(ISql connection)
     {
+        if (!IsTableDefined(connection, "tt_triage"))
+        {
+            CreateTriageTable(connection);
+        }
     }
 }
