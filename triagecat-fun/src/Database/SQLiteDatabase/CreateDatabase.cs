@@ -35,18 +35,19 @@ public class CreateDatabase
     }
 
     /*----------------------------------------------------------------------------
-        %%Function: CreateTriageTable
-        %%Qualified: tt.Database.SQLiteDatabase.CreateDatabase.CreateTriageTable
+        %%Function: CreateAssetTable
+        %%Qualified: tt.Database.SQLiteDatabase.CreateDatabase.CreateAssetTable
 
         also prepopulate the claims for the root user
     ----------------------------------------------------------------------------*/
-    static void CreateTriageTable(ISql connection)
+    static void CreateAssetTable(ISql connection)
     {
         connection.ExecuteNonQuery(
-            "CREATE TABLE tt_triage ("
+            "CREATE TABLE tt_assets ("
             + "assetid VARCHAR(36) NOT NULL,"
             + "path VARCHAR(1024) NOT NULL,"
             + "notes VARCHAR(1024) NOT NULL,"
+            + "priority INTEGER NOT NULL, "
             + "PRIMARY KEY('assetid'));");
     }
 
@@ -61,7 +62,7 @@ public class CreateDatabase
         SQLite connection = SQLiteDatabase.OpenDatabase(database);
 
         CreateAuthTable(connection);
-        CreateTriageTable(connection);
+        CreateAssetTable(connection);
 
         return connection;
     }
@@ -75,9 +76,9 @@ public class CreateDatabase
 
     public static void ConvertDatabaseAsNeeded(ISql connection)
     {
-        if (!IsTableDefined(connection, "tt_triage"))
+        if (!IsTableDefined(connection, "tt_assets"))
         {
-            CreateTriageTable(connection);
+            CreateAssetTable(connection);
         }
     }
 }

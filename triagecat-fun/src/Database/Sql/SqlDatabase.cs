@@ -2,6 +2,7 @@
 using TCore.Logging;
 using TCore.SqlClient;
 using TCore.SqlCore;
+using tt.Types.Model.Assets;
 using tt.Types.Model.Users;
 
 namespace tt.Database.Sql;
@@ -26,6 +27,10 @@ public class SqlDatabase: IRexDatabase
     public void UpdatePasswordForUser(CorrelationID crid, string email, string newPasswordHash) =>
         VoidInvoke(SqlShared.Auth.UpdatePasswordForUser, this, crid, email, newPasswordHash);
 
+    public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid) =>
+        Invoke(SqlShared.Assets.GetAllAssets, this, crid);
+
+    public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => Invoke(SqlShared.Assets.AddAssets, this, crid, assets);
     #region Generic Invoke
     // Generic Invocations
     public delegate void VoidInvoke1Del<in T1>(ISql isql, CorrelationID crid, T1 t1);

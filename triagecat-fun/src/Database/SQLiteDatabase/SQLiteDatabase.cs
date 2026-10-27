@@ -4,6 +4,7 @@ using TCore.SqlCore;
 using TCore.SQLiteClient;
 using tt.Database.Sql;
 using tt.Model;
+using tt.Types.Model.Assets;
 using tt.Types.Model.Users;
 
 namespace tt.Database.SQLiteDatabase;
@@ -38,10 +39,12 @@ public class SQLiteDatabase : IRexDatabase
         return connection;
     }
 
-    public List<AuthUserEx> GetAuthAndClaimsForEmail(CorrelationID crid, string email) =>
-        SqlShared.Auth.GetAuthAndClaimsForEmail(m_connection, crid, email);
+    public List<AuthUserEx> GetAuthAndClaimsForEmail(CorrelationID crid, string email) => SqlShared.Auth.GetAuthAndClaimsForEmail(m_connection, crid, email);
 
     public void UpdatePasswordForUser(CorrelationID crid, string email, string newPasswordHash) =>
         SqlShared.Auth.UpdatePasswordForUser(m_connection, crid, email, newPasswordHash);
 
+    public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid) => SqlShared.Assets.GetAllAssets(m_connection, crid);
+
+    public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => SqlShared.Assets.AddAssets(m_connection, crid, assets);
 }
