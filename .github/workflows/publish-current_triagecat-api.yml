@@ -42,13 +42,18 @@ jobs:
           test -f '${{ github.workspace }}/output/host.json'
           test -f '${{ github.workspace }}/output/worker.config.json'
           test -f '${{ github.workspace }}/output/functions.metadata'
-      
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_9794A3DB7E784E78B0AED0C05194885D }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C7B5330F28F74BA3B792EADD9A498D62 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D3E80ACC6C08428D8E59E4D1058BCFD4 }}
+
+      - name: Inspect runtime configuration
+        run: |
+          cat '${{ github.workspace }}/output/triagecat-fun.runtimeconfig.json'
+          cat '${{ github.workspace }}/output/worker.config.json'
+          cat '${{ github.workspace }}/output/functions.metadata'
+            - name: Login to Azure
+              uses: azure/login@v2
+              with:
+                client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_9794A3DB7E784E78B0AED0C05194885D }}
+                tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C7B5330F28F74BA3B792EADD9A498D62 }}
+                subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D3E80ACC6C08428D8E59E4D1058BCFD4 }}
 
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
