@@ -8,21 +8,39 @@ using tt.Database;
 using tt.Model;
 using tt.Middleware;
 
-string rawKey = System.Environment.GetEnvironmentVariable("TraynrexBlue.SigningKey") ?? "";
+try
+{
+    Console.Error.WriteLine("At top of loop");
+    string rawKey = System.Environment.GetEnvironmentVariable("TraynrexBlue.SigningKey") ?? "";
 
-tt.Model.Auth.Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(rawKey));
-tt.Model.Auth.Issuer = System.Environment.GetEnvironmentVariable("TraynrexBlue.Issuer") ?? "";
-tt.Model.Auth.Audience = System.Environment.GetEnvironmentVariable("TraynrexBlue.Audience") ?? "";
+    tt.Model.Auth.Issuer = System.Environment.GetEnvironmentVariable("TraynrexBlue.Issuer") ?? "";
+    tt.Model.Auth.Audience = System.Environment.GetEnvironmentVariable("TraynrexBlue.Audience") ?? "";
+    
+    Console.Error.WriteLine("Read environment variables");
+    
+    tt.Model.Auth.Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(rawKey));
 
-Session.RexDatabase = RexDatabase.InitializeFromEnvironment(
-    System.Environment.GetEnvironmentVariable("DatabaseSource") ?? "Must SqlServer | SQLite");
+    Console.Error.WriteLine("Created symmetric key");
+    
+    Session.RexDatabase = RexDatabase.InitializeFromEnvironment(
+        System.Environment.GetEnvironmentVariable("DatabaseSource") ?? "Must SqlServer | SQLite");
 
-var host = new HostBuilder()
-   .ConfigureFunctionsWorkerDefaults(builder =>
-                                     {
-                                         builder.UseMiddleware<FetchOptions>();
-                                         builder.UseMiddleware<JwtValidation>();
-                                     })
-   .Build();
+    Console.Error.WriteLine("Initialized database");
+    
+    var host = new HostBuilder()
+       .ConfigureFunctionsWorkerDefaults(builder =>
+                                         {
+                                             builder.UseMiddleware<FetchOptions>();
+                                             builder.UseMiddleware<JwtValidation>();
+                                         })
+       .Build();
 
-host.Run();
+    Console.Error.WriteLine("Built host");
+    
+    host.Run();
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"TriageCat FATAL STARTUP ERROR: {ex}");
+    throw;
+}
