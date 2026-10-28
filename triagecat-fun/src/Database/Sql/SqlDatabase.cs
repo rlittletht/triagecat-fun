@@ -31,6 +31,8 @@ public class SqlDatabase: IRexDatabase
         Invoke(SqlShared.Assets.GetAllAssets, this, crid);
 
     public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => Invoke(SqlShared.Assets.AddAssets, this, crid, assets);
+    public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates) => VoidInvoke(SqlShared.Assets.UpdateAssetItemValues, this, crid, assetId, updates);
+
     #region Generic Invoke
     // Generic Invocations
     public delegate void VoidInvoke1Del<in T1>(ISql isql, CorrelationID crid, T1 t1);

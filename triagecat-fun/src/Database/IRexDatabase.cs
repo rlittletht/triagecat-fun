@@ -21,4 +21,5 @@ public interface IRexDatabase
 
     public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid);
     public int AddAssets(CorrelationID crid, IEnumerable<Asset> assets);
+    public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates);
 }

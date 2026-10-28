@@ -1,17 +1,18 @@
-﻿using System.Collections.Immutable;
+﻿using Azure.Core;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Data.SqlClient;
-using System.Net.Quic;
-using System.Net;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Collections.Immutable;
+using System.Net;
+using System.Net.Quic;
+using System.Security.Claims;
+using System.Text;
 using TCore.Exceptions;
 using TCore.Logging;
-using tt.Types.Model;
 using tt.Extensions;
+using tt.Types.Model;
 
 namespace tt.Executors;
 
@@ -28,7 +29,11 @@ public class Executor
     {
         HttpResponseData response = req.CreateResponse(status);
 
-        response.Headers.Add("Access-Control-Allow-Origin", "http://localhost:3000");
+        string? origin = req.Origin();
+        
+        if (origin != null)
+            response.Headers.Add("Access-Control-Allow-Origin", origin);
+        
         response.Headers.Add("Access-Control-Allow-Credentials", "true");
 
         if (customizeResponse != null)

@@ -71,4 +71,9 @@ public class Assets
         sql.ExecuteNonQuery(cmdTextInit);
         return values.Count;
     }
+
+    public static void UpdateAssetItemValues(ISql sql, CorrelationID crid, Guid assetId, Dictionary<string, object?> newValues)
+    {
+        m_generalDataTable.UpdateItemValues(sql, crid, "tt_assets", assetId, newValues);
+    }
 }
