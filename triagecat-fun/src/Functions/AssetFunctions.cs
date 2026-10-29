@@ -20,6 +20,7 @@ public class AssetFunctions
         ILogger? log,
         string? gameId)
     {
+        log?.Log(LogLevel.Error, "Starting GetAllAssets handling");
         return await Executor.ExecuteGet(
             req,
             context,

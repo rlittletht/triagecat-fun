@@ -2,6 +2,7 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.Functions.Worker.Middleware;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using tt.Extensions;
 
@@ -48,6 +49,10 @@ public class FetchOptions : IFunctionsWorkerMiddleware
         HttpResponseData response = request.CreateResponse(System.Net.HttpStatusCode.OK);
 
         response.Headers.Add("Access-Control-Allow-Credentials", "true");
+        
+        ILogger? logger = context.GetLogger("FetchOptionsMiddleware");
+
+        logger?.Log(LogLevel.Error, "Starting FetchOptions handling");
 
         if (origin != null)
             response.Headers.Add("Access-Control-Allow-Origin", origin);
