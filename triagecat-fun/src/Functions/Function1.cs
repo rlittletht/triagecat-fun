@@ -23,7 +23,10 @@ public class Function1
         ILogger? log)
     {
         log?.LogInformation("C# HTTP trigger function processed a request.");
+        ILogger logger = context.GetLogger("TriageCat");
 
+        logger.LogError("Test invoked");
+        
         return await Executor.ExecuteGet<string>(
             req,
             context,
