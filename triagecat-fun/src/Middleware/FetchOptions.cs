@@ -55,7 +55,7 @@ public class FetchOptions : IFunctionsWorkerMiddleware
 
         if (origin != null)
         {
-            response.Headers.Add("Access-Control-Allow-Origin", origin);
+//            response.Headers.Add("Access-Control-Allow-Origin", origin);
             logger?.LogError($"TriageCat: adding Access-Control-Allow-Origin: {origin}");
         }
 

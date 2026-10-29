@@ -35,7 +35,7 @@ public class Executor
         if (origin != null)
         {
             logger?.LogError($"TriageCat: adding Access-Control-Allow-Origin: {origin}");
-            response.Headers.Add("Access-Control-Allow-Origin", origin);
+//            response.Headers.Add("Access-Control-Allow-Origin", origin);
         }
         
         response.Headers.Add("Access-Control-Allow-Credentials", "true");
