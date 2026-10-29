@@ -25,14 +25,18 @@ public class Executor
     public delegate Task<U> ExecuteGetDelAsync<U>(ExecutorContext context);
 
     public static async Task<HttpResponseData> BuildResponse<TRet>(
-        HttpRequestData req, TRet ret, CustomizeResponseDelegate<TRet>? customizeResponse = null, HttpStatusCode status = HttpStatusCode.OK)
+        ILogger? logger, HttpRequestData req, TRet ret, CustomizeResponseDelegate<TRet>? customizeResponse = null, HttpStatusCode status = HttpStatusCode.OK)
     {
         HttpResponseData response = req.CreateResponse(status);
 
         string? origin = req.Origin();
         
+        logger?.LogError($"TriageCat: Building response, origin: {origin}");
         if (origin != null)
+        {
+            logger?.LogError($"TriageCat: adding Access-Control-Allow-Origin: {origin}");
             response.Headers.Add("Access-Control-Allow-Origin", origin);
+        }
         
         response.Headers.Add("Access-Control-Allow-Credentials", "true");
 
@@ -72,23 +76,23 @@ public class Executor
             TBody? body = await GetParamsFromPostBody<TBody>(request, crid, logger);
             TRet ret = await executePost(executorContext, body);
 
-            return await BuildResponse(request, ret, customizeResponse);
+            return await BuildResponse(logger, request, ret, customizeResponse);
         }
         catch (TtExceptionAuthenticationFailure exc)
         {
-            return await BuildResponse(request, $"unauthorized: {exc.Message}", null, HttpStatusCode.Unauthorized);
+            return await BuildResponse(logger, request, $"unauthorized: {exc.Message}", null, HttpStatusCode.Unauthorized);
         }
         catch (SqlException sqlex)
         {
-            return await BuildResponse(request, $"fatal sql exception: {sqlex.Message}", null, HttpStatusCode.InternalServerError);
+            return await BuildResponse(logger, request, $"fatal sql exception: {sqlex.Message}", null, HttpStatusCode.InternalServerError);
         }
         catch (TcException tcex)
         {
-            return await BuildResponse(request, $"fatal core exception: {tcex.Message}", null, HttpStatusCode.InternalServerError);
+            return await BuildResponse(logger, request, $"fatal core exception: {tcex.Message}", null, HttpStatusCode.InternalServerError);
         }
         catch (Exception ex)
         {
-            return await BuildResponse(request, $"fatal general exception: {ex.Message}", null, HttpStatusCode.InternalServerError);
+            return await BuildResponse(logger, request, $"fatal general exception: {ex.Message}", null, HttpStatusCode.InternalServerError);
         }
     }
 
@@ -109,23 +113,23 @@ public class Executor
                 context.Claims());
 
             TRet ret = await del(executorContext);
-            return await BuildResponse(request, ret, customizeResponse);
+            return await BuildResponse(logger, request, ret, customizeResponse);
         }
         catch (TtExceptionAuthenticationFailure exc)
         {
-            return await BuildResponse(request, $"unauthorized: {exc.Message}", null, HttpStatusCode.Unauthorized);
+            return await BuildResponse(logger, request, $"unauthorized: {exc.Message}", null, HttpStatusCode.Unauthorized);
         }
         catch (SqlException sqlex)
         {
-            return await BuildResponse(request, $"fatal sql exception: {sqlex.Message}", null, HttpStatusCode.InternalServerError);
+            return await BuildResponse(logger, request, $"fatal sql exception: {sqlex.Message}", null, HttpStatusCode.InternalServerError);
         }
         catch (TcException tcex)
         {
-            return await BuildResponse(request, $"fatal core exception: {tcex.Message}", null, HttpStatusCode.InternalServerError);
+            return await BuildResponse(logger, request, $"fatal core exception: {tcex.Message}", null, HttpStatusCode.InternalServerError);
         }
         catch (Exception ex)
         {
-            return await BuildResponse(request, $"fatal general exception: {ex.Message}", null, HttpStatusCode.InternalServerError);
+            return await BuildResponse(logger, request, $"fatal general exception: {ex.Message}", null, HttpStatusCode.InternalServerError);
         }
     }
 }

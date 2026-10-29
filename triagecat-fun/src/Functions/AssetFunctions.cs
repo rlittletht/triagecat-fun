@@ -20,12 +20,14 @@ public class AssetFunctions
         ILogger? log,
         string? gameId)
     {
-        log?.Log(LogLevel.Error, "Starting GetAllAssets handling");
+        ILogger? logger = context.GetLogger("TriageCat");
+
+        logger?.Log(LogLevel.Error, "Starting GetAllAssets handling");
         return await Executor.ExecuteGet(
             req,
             context,
             new CorrelationID(),
-            log,
+            logger,
             async _context => Assets.GetAllAssets(_context.CorrelationId, _context.Logger));
     }
 
@@ -47,11 +49,13 @@ public class AssetFunctions
         FunctionContext context,
         ILogger? log)
     {
+        ILogger? logger = context.GetLogger("TriageCat");
+        
         return await Executor.ExecutePost<List<Types.Wire.Assets.AddAsset>, int>(
             req,
             context,
             new CorrelationID(),
-            log,
+            logger,
             AddAssetsAsync);
     }
 

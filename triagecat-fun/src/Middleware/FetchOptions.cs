@@ -13,6 +13,7 @@ public class FetchOptions : IFunctionsWorkerMiddleware
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
         HttpRequestData? request = await context.GetHttpRequestDataAsync();
+        ILogger? logger = context.GetLogger("TriageCat");
 
         if (request == null || request.Method != "OPTIONS")
         {
@@ -50,12 +51,13 @@ public class FetchOptions : IFunctionsWorkerMiddleware
 
         response.Headers.Add("Access-Control-Allow-Credentials", "true");
         
-        ILogger? logger = context.GetLogger("FetchOptionsMiddleware");
-
-        logger?.Log(LogLevel.Error, "Starting FetchOptions handling");
+        logger?.LogError($"TriageCat: OPTIONS request, origin: {origin}");
 
         if (origin != null)
+        {
             response.Headers.Add("Access-Control-Allow-Origin", origin);
+            logger?.LogError($"TriageCat: adding Access-Control-Allow-Origin: {origin}");
+        }
 
         response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
         response.Headers.Add("Access-Control-Methods", string.Join(",", methods).ToUpper());
