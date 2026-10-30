@@ -7,6 +7,7 @@ using System.Text;
 using tt.Database;
 using tt.Model;
 using tt.Middleware;
+using tt.Types.Model;
 
 try
 {
@@ -15,6 +16,8 @@ try
 
     tt.Model.Auth.Issuer = System.Environment.GetEnvironmentVariable("TraynrexBlue.Issuer") ?? "";
     tt.Model.Auth.Audience = System.Environment.GetEnvironmentVariable("TraynrexBlue.Audience") ?? "";
+    Config.VisibleRows = int.TryParse(System.Environment.GetEnvironmentVariable("TraynrexBlue.VisibleRows"), out int visibleRows) ? visibleRows : 4;
+    Config.ImagesPerPage = int.TryParse(System.Environment.GetEnvironmentVariable("TraynrexBlue.ImagesPerPage"), out int imagesPerPage) ? imagesPerPage : 100;
     
     tt.Model.Auth.Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(rawKey));
     

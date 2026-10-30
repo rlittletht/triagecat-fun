@@ -2,6 +2,7 @@ using System.Data.SQLite;
 using TCore.SqlCore;
 using TCore.SQLiteClient;
 using tt.Controllers;
+using tt.Types.Model;
 
 namespace tt.Database.SQLiteDatabase;
 
@@ -67,8 +68,8 @@ public class CreateDatabase
             cmd =>
             {
                 cmd.AddParameterWithValue("@id", SQLiteDatabase.s_rootUserId);
-                cmd.AddParameterWithValue("@visibleRows", 3);
-                cmd.AddParameterWithValue("@imagesPerPage", 20);
+                cmd.AddParameterWithValue("@visibleRows", Config.VisibleRows);
+                cmd.AddParameterWithValue("@imagesPerPage", Config.ImagesPerPage);
             });
     }
 

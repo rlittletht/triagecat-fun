@@ -1,5 +1,6 @@
 ﻿using TCore.Logging;
 using TCore.SqlCore;
+using tt.Types.Model;
 using tt.Types.Model.Users;
 
 namespace tt.Database.SQLiteDatabase;
@@ -15,7 +16,7 @@ public class Auth
         Guid id = RT.Comb.Provider.Sql.Create();
 
         SqlShared.Auth.InsertNewAuthUser(sql, crid, id, email, passwordHash);
-        SqlShared.Users.CreateUserPreferences(sql, crid, id, new UserPreferences { VisibleRows = 3, ImagesPerPage = 20 });
+        SqlShared.Users.CreateUserPreferences(sql, crid, id, new UserPreferences { VisibleRows = Config.VisibleRows, ImagesPerPage = Config.ImagesPerPage });
 
         return id;
     }
