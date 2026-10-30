@@ -1,8 +1,10 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.Logging;
+using System.Text;
 using TCore;
 using TCore.Logging;
 using TCore.SqlCore;
 using tt.Database.Sql;
+using static tt.Database.SqlShared.TtSql;
 
 namespace tt.Database.SqlShared;
 
@@ -17,10 +19,7 @@ public static class TtSql
             "SELECT $$tt_auth$$.userid, $$tt_auth$$.email, $$tt_auth$$.password "
             + "FROM $$#tt_auth$$ ",
             new TableAliases(
-                new Dictionary<string, string>
-                {
-                    { "tt_auth", "AUTH" }
-                })
+                new Dictionary<string, string> { { "tt_auth", "AUTH" } })
         );
 
     /*----------------------------------------------------------------------------
@@ -77,5 +76,117 @@ public static class TtSql
                     cmd.AddParameterWithValue($"@{field}", newValues[field]);
                 }
             });
+    }
+
+    public struct PartedLineAndParams
+    {
+        public string Line;
+        public Tuple<string, object>[] Params;
+    }
+
+    public static int ExecutePartedCommands<T>(
+        ISql sql,
+        string commandBase,
+        IEnumerable<T> items,
+        Func<T, int, PartedLineAndParams> buildLineAndParams,
+        int partLimit,
+        string joinString,
+        TableAliases? aliases)
+    {
+        StringBuilder sb = new StringBuilder();
+        int current = 0;
+        int totalCount = 0;
+        
+        sb.Clear();
+        sb.Append(commandBase);
+
+        List<Tuple<string, object>> parameters = new List<Tuple<string, object>>();
+        
+        foreach (T item in items)
+        {
+            if (current == partLimit)
+            {
+                string command = sb.ToString();
+
+                if (!string.IsNullOrWhiteSpace(command))
+                {
+                    sql.ExecuteNonQuery(new SqlCommandTextInit(sb.ToString(), aliases),
+                        (cmd) =>
+                        {
+                            foreach (Tuple<string, object> param in parameters)
+                            {
+                                cmd.AddParameterWithValue(param.Item1, param.Item2);
+                            }
+                        });
+                    current = 0;
+                }
+
+                sb.Clear();
+                sb.Append(commandBase);
+                parameters.Clear();
+            }
+
+            if (current > 0)
+                sb.Append(joinString);
+
+            PartedLineAndParams lineAndParams = buildLineAndParams(item, current);
+            sb.Append(lineAndParams.Line);
+            parameters.AddRange(lineAndParams.Params);
+
+            current++;
+            totalCount++;
+        }
+
+        if (current > 0)
+        {
+            string sCmd = sb.ToString();
+
+            if (!string.IsNullOrWhiteSpace(sCmd))
+            {
+                sql.ExecuteNonQuery(
+                    new SqlCommandTextInit(sb.ToString(), aliases),
+                    (cmd) =>
+                    {
+                        foreach (Tuple<string, object> param in parameters)
+                        {
+                            cmd.AddParameterWithValue(param.Item1, param.Item2);
+                        }
+                    });
+            }
+        }
+
+        return totalCount;
+    }
+
+    public static int DoGenericPartedCommands<T>(
+        ISql sql,
+        string commandBase,
+        IEnumerable<T> items,
+        Func<T, int, PartedLineAndParams> buildLineAndParams,
+        int partLimit,
+        string joinString,
+        TableAliases? aliases)
+    {
+        sql.BeginTransaction();
+
+        try
+        {
+            int count = ExecutePartedCommands(
+                sql,
+                commandBase,
+                items,
+                buildLineAndParams,
+                partLimit,
+                joinString,
+                aliases);
+
+            sql.Commit();
+            return count;
+        }
+        catch (Exception)
+        {
+            sql.Rollback();
+            throw;
+        }
     }
 }

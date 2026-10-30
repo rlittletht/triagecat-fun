@@ -35,7 +35,7 @@ public class Assets
 
 #endregion
 
-    private static BaseGeneralDataTable<Asset> m_generalDataTable = new BaseGeneralDataTable<Asset>(s_queryAssets, s_insertNewAsset, s_deleteAsset);
+    private static BaseGeneralDataTable<Asset> m_generalDataTable = new BaseGeneralDataTable<Asset>(s_queryAssets, s_insertNewAsset, s_deleteAsset, "assetid");
 
     public static IReadOnlyCollection<Asset> GetAllAssets(ISql sql, CorrelationID crid)
     {
@@ -50,26 +50,27 @@ public class Assets
 
     public static int AddAssets(ISql sql, CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets)
     {
-        List<string> values = new();
-
-        foreach (Types.Model.Assets.Asset asset in assets)
-        {
-            values.Add(
-                $" ("
-                + $"{TCore.SqlCore.SqlText.SqlifyQuoted(asset.AssetId.ToString())},"
-                + $"{TCore.SqlCore.SqlText.SqlifyQuoted(asset.Path)},"
-                + $"{TCore.SqlCore.SqlText.SqlifyQuoted(asset.Notes)},"
-                + $"{asset.Priority}) ");
-        }
-
-        if (values.Count == 0)
-            return 0;
-
-        SqlCommandTextInit cmdTextInit =
-            new($"{s_insertBase} VALUES {String.Join(",", values)}", s_tableAliases);
-
-        sql.ExecuteNonQuery(cmdTextInit);
-        return values.Count;
+        return TtSql.DoGenericPartedCommands(
+            sql,
+            $"{s_insertBase} VALUES ",
+            assets,
+            (asset, index) =>
+            {
+                return new TtSql.PartedLineAndParams
+                       {
+                           Line = $" (@assetid{index}, @path{index}, @notes{index}, @priority{index})",
+                           Params = new[]
+                                    {
+                                        new Tuple<string, object>($"@assetid{index}", asset.AssetId),
+                                        new Tuple<string, object>($"@path{index}", asset.Path),
+                                        new Tuple<string, object>($"@notes{index}", asset.Notes),
+                                        new Tuple<string, object>($"@priority{index}", asset.Priority)
+                                    }
+                       };
+            },
+            2,
+            ",",
+            s_tableAliases);
     }
 
     public static void UpdateAssetItemValues(ISql sql, CorrelationID crid, Guid assetId, Dictionary<string, object?> newValues)

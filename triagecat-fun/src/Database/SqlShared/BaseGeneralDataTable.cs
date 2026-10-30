@@ -10,11 +10,14 @@ public class BaseGeneralDataTable<T>
     private readonly SqlCommandTextInit m_insertNewItem;
     private readonly SqlCommandTextInit? m_deleteItem;
 
-    public BaseGeneralDataTable(SqlCommandTextInit queryDataTable, SqlCommandTextInit insertNewItem, SqlCommandTextInit deleteItem)
+    private readonly string m_idColumn;
+    
+    public BaseGeneralDataTable(SqlCommandTextInit queryDataTable, SqlCommandTextInit insertNewItem, SqlCommandTextInit deleteItem, string idColumn = "id")
     {
         m_queryDataTable = queryDataTable;
         m_insertNewItem = insertNewItem;
         m_deleteItem = deleteItem;
+        m_idColumn = idColumn;
     }
 
     public BaseGeneralDataTable(SqlCommandTextInit queryDataTable, SqlCommandTextInit insertNewItem)
@@ -92,6 +95,6 @@ public class BaseGeneralDataTable<T>
     ----------------------------------------------------------------------------*/
     public void UpdateItemValues(ISql sql, CorrelationID crid, string tableName, Guid id, Dictionary<string, object?> newValues)
     {
-        TtSql.BuildAndExecuteUpdateValuesForId(sql, crid, $"UPDATE {tableName} SET ", "id", id, newValues);
+        TtSql.BuildAndExecuteUpdateValuesForId(sql, crid, $"UPDATE {tableName} SET ", m_idColumn, id, newValues);
     }
 }
