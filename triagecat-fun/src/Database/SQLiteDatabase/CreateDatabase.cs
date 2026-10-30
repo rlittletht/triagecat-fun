@@ -59,9 +59,10 @@ public class CreateDatabase
             + "id VARCHAR(36) NOT NULL,"
             + "visibleRows INTEGER NOT NULL,"
             + "imagesPerPage INTEGER NOT NULL,"
+            + "tileSize INTEGER NOT NULL,"
             + "PRIMARY KEY('id'));");
 
-        SqlCommandTextInit cmdtext = new("INSERT INTO tt_userpreferences (id, visibleRows, imagesPerPage) VALUES (@id, @visibleRows, @imagesPerPage)");
+        SqlCommandTextInit cmdtext = new("INSERT INTO tt_userpreferences (id, visibleRows, imagesPerPage, tileSize) VALUES (@id, @visibleRows, @imagesPerPage, @tileSize)");
 
         connection.ExecuteNonQuery(
             cmdtext,
@@ -70,6 +71,7 @@ public class CreateDatabase
                 cmd.AddParameterWithValue("@id", SQLiteDatabase.s_rootUserId);
                 cmd.AddParameterWithValue("@visibleRows", Config.VisibleRows);
                 cmd.AddParameterWithValue("@imagesPerPage", Config.ImagesPerPage);
+                cmd.AddParameterWithValue("@tileSize", Config.TileSize);
             });
     }
 

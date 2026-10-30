@@ -29,6 +29,10 @@ public class Users
             updates["imagesPerPage"] = newUserPreferences.ImagesPerPage;
         }
 
+        if (baseUserPreferences.TileSize != newUserPreferences.TileSize)
+        {
+            updates["tileSize"] = newUserPreferences.TileSize;
+        }
         return updates;
     }
 
