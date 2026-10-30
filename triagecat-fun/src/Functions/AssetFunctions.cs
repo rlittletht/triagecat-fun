@@ -12,6 +12,13 @@ namespace tt.Functions;
 
 public class AssetFunctions
 {
+    /*----------------------------------------------------------------------------
+        %%Function: GetAllAssets
+        %%Qualified: tt.Functions.AssetFunctions.GetAllAssets
+    ----------------------------------------------------------------------------*/
+    [Authorize(
+        RequiredClaims = [TtClaimTypes.AssetAccess, ClaimTypes.NameIdentifier],
+        RequiredClaimValues = [TtClaimTypes.Access_Read])]
     [Function("GetAllAssets")]
     public async Task<HttpResponseData> GetAllAssets(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", "options", Route = "assets/GetAllAssets")]
@@ -43,6 +50,9 @@ public class AssetFunctions
     }
 
     [Function("AddAssets")]
+    [Authorize(
+        RequiredClaims = [TtClaimTypes.AssetAccess, ClaimTypes.NameIdentifier],
+        RequiredClaimValues = [TtClaimTypes.Access_Write])]
     public async Task<HttpResponseData> AddAssets(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", "options", Route = "assets/AddAssets")]
         HttpRequestData req,
@@ -75,6 +85,9 @@ public class AssetFunctions
         %%Function: UpdateAsset
         %%Qualified: tt.Functions.AssetFunctions.UpdateAsset
     ----------------------------------------------------------------------------*/
+    [Authorize(
+        RequiredClaims = [TtClaimTypes.AssetAccess, ClaimTypes.NameIdentifier],
+        RequiredClaimValues = [TtClaimTypes.Access_Write])]
     [Function("UpdateAsset")]
     public async Task<HttpResponseData> UpdateAsset(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", "options", Route = "assets/UpdateAsset")]

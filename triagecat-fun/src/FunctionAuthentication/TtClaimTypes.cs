@@ -20,9 +20,18 @@ public static class TtClaimTypes
     // objects and permissions)
     public const string CreateTests = "https://www.thetasoft.com/claimTypes/createTests";
 
+    // asset access is an array: "read", "write"
+    public const string AssetAccess = "https://www.thetasoft.com/claimTypes/assetAccess";
+    
     // some claims are just present or not; this is the value that must be set for it to be considered
     // "present"
     public const string ClaimPresent = "true";
+
+    // Claims Values
+    public const string Access_Read = "read";
+    public const string Access_Write = "write";
+
+    public static HashSet<string> Access_Claims = new() { Access_Read, Access_Write };
 
     public static readonly Guid s_RexGroupId = Guid.Empty;
 }

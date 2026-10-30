@@ -63,7 +63,7 @@ public static class Claims
             {
                 if (claim.Type == claimReq)
                 {
-                    if (claim.Value == check)
+                    if (check == TtClaimTypes.ClaimPresent || claim.Value == check)
                         return true;
                 }
             }

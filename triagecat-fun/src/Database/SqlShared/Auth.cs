@@ -1,6 +1,7 @@
 ﻿using TCore.Logging;
 using TCore.SqlClient;
 using TCore.SqlCore;
+using tt.Controllers;
 using tt.Database.SqlShared;
 using tt.Types.Model.Auth;
 using tt.Types.Model;
@@ -10,9 +11,7 @@ namespace tt.Database.SqlShared;
 public class Auth
 {
     public static TableAliases s_tableAliases = new TableAliases(
-        new Dictionary<string, string>
-        {
-        });
+        new Dictionary<string, string> { });
 
     /*----------------------------------------------------------------------------
         %%Function: InsertNewAuthUser
@@ -31,7 +30,7 @@ public class Auth
                 cmd.AddParameterWithValue("@password", passwordHash);
             });
     }
-    
+
     /*----------------------------------------------------------------------------
         %%Function: GetAuthAndClaimsForEmail
         %%Qualified: tr.Database.SqlShared.Auth.GetAuthAndClaimsForEmail
@@ -42,7 +41,7 @@ public class Auth
         SqlSelect select = new(TtSql.s_SelectBase_AuthUserEx);
         select.Where.Add("email = @email", SqlWhere.Op.And);
 
-        return sql.ExecuteDelegatedQuery(
+        List<AuthUserEx> authAndClaims = sql.ExecuteDelegatedQuery(
             crid,
             select.ToString(),
             (ISqlReader reader, Guid _crid, ref List<AuthUserEx> building) =>
@@ -53,7 +52,7 @@ public class Auth
                         UserId = reader.GetGuid(0),
                         Email = reader.GetString(1),
                         Password = reader.GetString(2),
-                        DisplayName = $"{reader.GetString(3)} {reader.GetString(4)}",
+                        DisplayName = "",
                         Claim = reader.GetNullableString(5),
                         ClaimValue = reader.GetNullableString(6)
                     };
@@ -65,6 +64,18 @@ public class Auth
             {
                 cmd.AddParameterWithValue("@email", email);
             });
+        
+        // every auth'd user gets read and write claims for now
+        if (authAndClaims.Count > 0)
+        {
+            if (authAndClaims.Count != 1)
+                throw new TtException($"auth and claims returned more than 1 result: {authAndClaims.Count}");
+
+            authAndClaims[0].Claim = TtClaimTypes.AssetAccess;
+            authAndClaims[0].ClaimValue = string.Join(",", [TtClaimTypes.Access_Read, TtClaimTypes.Access_Write]);
+        }
+
+        return authAndClaims;
     }
 
     /*----------------------------------------------------------------------------

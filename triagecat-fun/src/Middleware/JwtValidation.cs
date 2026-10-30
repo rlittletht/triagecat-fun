@@ -132,7 +132,10 @@ public class JwtValidation : IFunctionsWorkerMiddleware
             foreach ((string, string) claimValue in claimsRequired)
             {
                 if (!Claims.DoesClaimContain(principal.Claims, claimValue.Item1, claimValue.Item2))
+                {
                     DenyRequest(context, request, $"Missing required claim: {claimValue.Item1}({claimValue.Item2})");
+                    return;
+                }
             }
         }
 

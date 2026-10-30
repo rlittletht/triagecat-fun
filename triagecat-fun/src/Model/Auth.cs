@@ -29,9 +29,10 @@ public class Auth
 
     /*----------------------------------------------------------------------------
         %%Function: BuildLoginResultFromAuthAndClaimsList
-        %%Qualified: tt.Model.Auth.BuildLoginResultFromAuthAndClaimsList
+        %%Qualified: tt.Functions.Auth.BuildLoginResultFromAuthAndClaimsList
 
-        given a list of user + claims, build the login result.
+        This is a slightly simplified version from Traynrex.  There are no
+        groups to worry about
     ----------------------------------------------------------------------------*/
     static LoginResult BuildLoginResultFromAuthAndClaimsList(List<AuthUserEx> authAndClaims, out string? jwt, out DateTime? expires)
     {
@@ -40,7 +41,33 @@ public class Auth
 
         AuthUserEx firstAuthUserEx = authAndClaims[0];
 
-        List<Claim> returnClaims = new();
+        // at this point we know who the user is. let's build a token including
+        // the name, email, and userid
+        List<Claim> thisClaims = new();
+
+        foreach (AuthUserEx authUserEx in authAndClaims)
+        {
+            if (authUserEx.Claim == null)
+                continue;
+
+            if (authUserEx.ClaimValue != null && authUserEx.ClaimValue.Contains(","))
+            {
+                // expand this into multiple claims
+                string[] values = authUserEx.ClaimValue.Split(",", StringSplitOptions.TrimEntries);
+
+                foreach (string value in values)
+                {
+                    thisClaims.Add(new Claim(authUserEx.Claim, value));
+                }
+            }
+            else
+            {
+                thisClaims.Add(new Claim(authUserEx.Claim, authUserEx.ClaimValue ?? ""));
+            }
+        }
+
+        // we only have one group. finish setting up the claims
+        List<Claim> returnClaims = thisClaims;
 
         returnClaims.Add(new Claim(ClaimTypes.Name, firstAuthUserEx.DisplayName));
         returnClaims.Add(new Claim(ClaimTypes.Email, firstAuthUserEx.Email));
@@ -67,6 +94,7 @@ public class Auth
 
         return BuildLoginResult(returnClaims, firstAuthUserEx);
     }
+
 
     /*----------------------------------------------------------------------------
         %%Function: Login
