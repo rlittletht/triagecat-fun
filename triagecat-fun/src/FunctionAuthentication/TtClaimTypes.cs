@@ -22,6 +22,9 @@ public static class TtClaimTypes
 
     // asset access is an array: "read", "write"
     public const string AssetAccess = "https://www.thetasoft.com/claimTypes/assetAccess";
+
+    // user profile access is an array: "read", "write"
+    public const string UserProfile = "https://www.thetasoft.com/claimTypes/userProfile";
     
     // some claims are just present or not; this is the value that must be set for it to be considered
     // "present"
@@ -30,8 +33,9 @@ public static class TtClaimTypes
     // Claims Values
     public const string Access_Read = "read";
     public const string Access_Write = "write";
-
-    public static HashSet<string> Access_Claims = new() { Access_Read, Access_Write };
+    public const string Access_Create = "create";
+    
+    public static HashSet<string> Access_Claims = new() { Access_Read, Access_Write, Access_Create };
 
     public static readonly Guid s_RexGroupId = Guid.Empty;
 }
