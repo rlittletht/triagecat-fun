@@ -2,8 +2,8 @@
 using TCore.SqlClient;
 using TCore.SqlCore;
 using tt.Database.SqlShared;
+using tt.Types.Model.Auth;
 using tt.Types.Model;
-using tt.Types.Model.Users;
 
 namespace tt.Database.SqlShared;
 
@@ -14,6 +14,24 @@ public class Auth
         {
         });
 
+    /*----------------------------------------------------------------------------
+        %%Function: InsertNewAuthUser
+        %%Qualified: tt.Database.SqlShared.Auth.InsertNewAuthUser
+    ----------------------------------------------------------------------------*/
+    public static void InsertNewAuthUser(ISql sql, CorrelationID crid, Guid id, string email, string passwordHash)
+    {
+        SqlCommandTextInit cmdText = new(
+            "INSERT INTO tt_auth (userid, email, password) VALUES (@userid, @email, @password)");
+        sql.ExecuteNonQuery(
+            cmdText,
+            (cmd) =>
+            {
+                cmd.AddParameterWithValue("@userid", id);
+                cmd.AddParameterWithValue("@email", email);
+                cmd.AddParameterWithValue("@password", passwordHash);
+            });
+    }
+    
     /*----------------------------------------------------------------------------
         %%Function: GetAuthAndClaimsForEmail
         %%Qualified: tr.Database.SqlShared.Auth.GetAuthAndClaimsForEmail

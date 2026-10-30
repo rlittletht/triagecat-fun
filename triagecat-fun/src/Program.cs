@@ -16,16 +16,10 @@ try
     tt.Model.Auth.Issuer = System.Environment.GetEnvironmentVariable("TraynrexBlue.Issuer") ?? "";
     tt.Model.Auth.Audience = System.Environment.GetEnvironmentVariable("TraynrexBlue.Audience") ?? "";
     
-    Console.Error.WriteLine("Read environment variables");
-    
     tt.Model.Auth.Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(rawKey));
-
-    Console.Error.WriteLine("Created symmetric key");
     
     Session.RexDatabase = RexDatabase.InitializeFromEnvironment(
         System.Environment.GetEnvironmentVariable("DatabaseSource") ?? "Must SqlServer | SQLite");
-
-    Console.Error.WriteLine("Initialized database");
     
     var host = new HostBuilder()
        .ConfigureFunctionsWorkerDefaults(builder =>
@@ -34,8 +28,6 @@ try
                                              builder.UseMiddleware<JwtValidation>();
                                          })
        .Build();
-
-    Console.Error.WriteLine("Built host");
     
     host.Run();
 }

@@ -9,8 +9,8 @@
 ----------------------------------------------------------------------------*/
 
 using TCore.Logging;
+using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
-using tt.Types.Model.Users;
 
 namespace tt.Database;
 
@@ -22,4 +22,7 @@ public interface IRexDatabase
     public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid);
     public int AddAssets(CorrelationID crid, IEnumerable<Asset> assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates);
+
+    public Guid CreateAuthUserForEmailPassword(CorrelationID crid, string email, string passwordHash);
+
 }

@@ -4,8 +4,8 @@ using TCore.SqlCore;
 using TCore.SQLiteClient;
 using tt.Database.Sql;
 using tt.Model;
+using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
-using tt.Types.Model.Users;
 
 namespace tt.Database.SQLiteDatabase;
 
@@ -48,4 +48,8 @@ public class SQLiteDatabase : IRexDatabase
 
     public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => SqlShared.Assets.AddAssets(m_connection, crid, assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> newValues) => SqlShared.Assets.UpdateAssetItemValues(m_connection, crid, assetId, newValues);
+
+    public Guid CreateAuthUserForEmailPassword(CorrelationID crid, string email, string passwordHash) =>
+        Auth.CreateAuthUserForEmailPassword(m_connection, crid, email, passwordHash);
+
 }

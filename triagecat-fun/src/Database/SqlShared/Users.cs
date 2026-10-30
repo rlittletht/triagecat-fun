@@ -1,7 +1,6 @@
 ﻿using TCore.Logging;
 using TCore.SqlCore;
 using tt.Database.SqlShared;
-using tt.Types.Model.Users;
 using tt.Model;
 using TCore.SqlClient;
 using tt.Controllers;

@@ -1,12 +1,13 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using System.Collections.Immutable;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 using TCore.Logging;
-using System.Collections.Immutable;
-using tt.Types.Wire;
 using tt.Types.Model;
-using tt.Types.Model.Users;
+using tt.Types.Model.Auth;
+using tt.Types.Wire;
 
 namespace tt.Model;
 
@@ -120,5 +121,71 @@ public class Auth
         string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
         Session.RexDatabase.UpdatePasswordForUser(crid, email, hashedPassword);
         return "password changed";
+    }
+
+
+    /*----------------------------------------------------------------------------
+        %%Function: isValidEmail
+        %%Qualified: tr.Controllers.AuthController.isValidEmail
+
+        very simple match.  No whitespace allowed,
+    ----------------------------------------------------------------------------*/
+    static bool isValidEmail(string email)
+    {
+        Regex rex = new(@"^[^\s\.]+@([^\s\.]+\.)+[^\s\.]+$");
+
+        return rex.IsMatch(email);
+    }
+
+
+    /*----------------------------------------------------------------------------
+        %%Function: ValidateUserCreateParamsAndHashPassword
+        %%Qualified: tr.Model.Users.ValidateUserCreateParamsAndHashPassword
+
+        Validate the CreateParams data and hash the password
+
+        THIS IS DESCRUCTIVE TO THE DATA IN THE CreateParams.  The password will
+        be hashed and the email will be trimmed
+    ----------------------------------------------------------------------------*/
+    public static void ValidateUserCreateParamsAndHashPassword(CreateAuthUserParam data)
+    {
+        if (string.IsNullOrWhiteSpace(data.Email))
+            throw new ArgumentNullException(nameof(data.Email));
+
+        if (string.IsNullOrWhiteSpace(data.Password))
+            throw new ArgumentNullException(nameof(data.Password));
+
+        data.Email = data.Email.Trim();
+
+        if (!isValidEmail(data.Email))
+            throw new ArgumentException("email address invalid", nameof(data));
+
+        // first, create the auth user
+        data.Password = BCrypt.Net.BCrypt.HashPassword(data.Password);
+    }
+
+
+    /*----------------------------------------------------------------------------
+        %%Function: CreateAuthUser
+        %%Qualified: tt.Model.Auth.CreateAuthUser
+    ----------------------------------------------------------------------------*/
+    public static Types.Model.Auth.CreateAuthUserResult CreateAuthUser(
+        CorrelationID crid, ILogger? logger,
+        CreateAuthUserParam createParams)
+    {
+        if (string.IsNullOrEmpty(createParams?.Email))
+            throw new TtExceptionInvalidArgument("email address null or empty");
+
+        ValidateUserCreateParamsAndHashPassword(createParams);
+
+        Guid guid = Session.RexDatabase.CreateAuthUserForEmailPassword(
+            crid,
+            createParams.Email,
+            createParams.Password);
+
+        return new Types.Model.Auth.CreateAuthUserResult
+        {
+            UserId = guid.ToString()
+        };
     }
 }

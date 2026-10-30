@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.50.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.7" />
+    <PackageReference Include="Microsoft.VisualStudio.VsixColorCompiler" Version="17.0.31709.430" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="RT.Comb" Version="4.1.0" />
     <PackageReference Include="TCore.Exceptions" Version="1.1.1" />
@@ -24,6 +25,19 @@
     <PackageReference Include="TCore.SqlClient" Version="1.5.5" />
     <PackageReference Include="TCore.SqlCore" Version="1.4.7" />
     <PackageReference Include="TCore.SQLiteClient" Version="1.5.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\dev\active\triagecat\fun\triagecat-fun\src\Types\Wire\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\dev\active\triagecat\fun\triagecat-fun\src\Types\Wire\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="src\Types\Model\Users\" />
+    <Folder Include="src\Types\Wire\Users\" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using tt.Types.Wire;
 
-namespace tt.Types.Model.Users;
+namespace tt.Types.Model.Auth;
 
 public class AuthUserEx
 {

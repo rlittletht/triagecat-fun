@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 
-namespace tt.Types.Model.Users;
+namespace tt.Types.Model.Auth;
 
 public class AuthUser
 {
