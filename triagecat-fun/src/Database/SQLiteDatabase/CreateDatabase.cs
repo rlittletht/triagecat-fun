@@ -51,6 +51,27 @@ public class CreateDatabase
             + "PRIMARY KEY('assetid'));");
     }
 
+    static void CreateUserPreferencesTable(ISql connection)
+    {
+        connection.ExecuteNonQuery(
+            "CREATE TABLE tt_userpreferences ("
+            + "id VARCHAR(36) NOT NULL,"
+            + "visibleRows INTEGER NOT NULL,"
+            + "imagesPerPage INTEGER NOT NULL,"
+            + "PRIMARY KEY('id'));");
+
+        SqlCommandTextInit cmdtext = new("INSERT INTO tt_userpreferences (id, visibleRows, imagesPerPage) VALUES (@id, @visibleRows, @imagesPerPage)");
+
+        connection.ExecuteNonQuery(
+            cmdtext,
+            cmd =>
+            {
+                cmd.AddParameterWithValue("@id", SQLiteDatabase.s_rootUserId);
+                cmd.AddParameterWithValue("@visibleRows", 3);
+                cmd.AddParameterWithValue("@imagesPerPage", 20);
+            });
+    }
+
     /*----------------------------------------------------------------------------
         %%Function: CreateNewDatabase
         %%Qualified: tt.Database.SQLiteDatabase.CreateDatabase.CreateNewDatabase
@@ -63,6 +84,7 @@ public class CreateDatabase
 
         CreateAuthTable(connection);
         CreateAssetTable(connection);
+        CreateUserPreferencesTable(connection);
 
         return connection;
     }
@@ -79,6 +101,11 @@ public class CreateDatabase
         if (!IsTableDefined(connection, "tt_assets"))
         {
             CreateAssetTable(connection);
+        }
+
+        if (!IsTableDefined(connection, "tt_userpreferences"))
+        {
+            CreateUserPreferencesTable(connection);
         }
     }
 }

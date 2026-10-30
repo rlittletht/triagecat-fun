@@ -6,6 +6,7 @@ using tt.Database.Sql;
 using tt.Model;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
+using tt.Types.Model.Users;
 
 namespace tt.Database.SQLiteDatabase;
 
@@ -52,5 +53,9 @@ public class SQLiteDatabase : IRexDatabase
 
     public Guid CreateAuthUserForEmailPassword(CorrelationID crid, string email, string passwordHash) =>
         Auth.CreateAuthUserForEmailPassword(m_connection, crid, email, passwordHash);
+
+    public void CreateUserPreferences(CorrelationID crid, Guid userId, UserPreferences userPreferences) => SqlShared.Users.CreateUserPreferences(m_connection, crid, userId, userPreferences);
+    public UserPreferences GetUserPreferences(CorrelationID crid, Guid userId) => SqlShared.Users.GetUserPreferences(m_connection, crid, userId);
+    public void UpdateUserPreferences(CorrelationID crid, Guid userId, Dictionary<string, object?> updates) => SqlShared.Users.UpdateUserPreferences(m_connection, crid, userId, updates);
 
 }

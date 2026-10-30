@@ -35,9 +35,4 @@
     <None Include="D:\dev\active\triagecat\fun\triagecat-fun\src\Types\Wire\.editorconfig" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="src\Types\Model\Users\" />
-    <Folder Include="src\Types\Wire\Users\" />
-  </ItemGroup>
-
 </Project>

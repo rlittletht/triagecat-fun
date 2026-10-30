@@ -11,6 +11,7 @@
 using TCore.Logging;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
+using tt.Types.Model.Users;
 
 namespace tt.Database;
 
@@ -25,5 +26,9 @@ public interface IRexDatabase
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates);
 
     public Guid CreateAuthUserForEmailPassword(CorrelationID crid, string email, string passwordHash);
+
+    public void CreateUserPreferences(CorrelationID crid, Guid userId, UserPreferences userPreferences);
+    public UserPreferences GetUserPreferences(CorrelationID crid, Guid userId);
+    public void UpdateUserPreferences(CorrelationID crid, Guid userId, Dictionary<string, object?> updates);
 
 }

@@ -4,6 +4,7 @@ using TCore.SqlClient;
 using TCore.SqlCore;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
+using tt.Types.Model.Users;
 
 namespace tt.Database.Sql;
 
@@ -38,6 +39,15 @@ public class SqlDatabase: IRexDatabase
 
     public AuthUserEx GetAuthInfoFromUser(CorrelationID crid, Guid userId) =>
         Invoke(SqlShared.Auth.GetAuthInfoFromUser, this, crid, userId);
+
+    public void CreateUserPreferences(CorrelationID crid, Guid userId, UserPreferences userPreferences) =>
+        VoidInvoke(SqlShared.Users.CreateUserPreferences, this, crid, userId, userPreferences);
+
+    public UserPreferences GetUserPreferences(CorrelationID crid, Guid userId) =>
+        Invoke(SqlShared.Users.GetUserPreferences, this, crid, userId);
+
+    public void UpdateUserPreferences(CorrelationID crid, Guid userId, Dictionary<string, object?> updates) =>
+        VoidInvoke(SqlShared.Users.UpdateUserPreferences, this, crid, userId, updates);
 
     #region Generic Invoke
     // Generic Invocations
