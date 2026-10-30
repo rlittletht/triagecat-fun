@@ -1,5 +1,6 @@
 ﻿using TCore.Logging;
 using TCore.SqlCore;
+using tt.Types.Model.Users;
 
 namespace tt.Database.Sql;
 
@@ -20,6 +21,7 @@ public class Auth
             Guid id = RT.Comb.Provider.Sql.Create();
 
             SqlShared.Auth.InsertNewAuthUser(sql, crid, id, email, passwordHash);
+            SqlShared.Users.CreateUserPreferences(sql, crid, id, new UserPreferences { VisibleRows = 3, ImagesPerPage = 20 });
             return id;
         }
         finally
