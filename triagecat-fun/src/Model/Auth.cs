@@ -27,6 +27,11 @@ public class Auth
         };
     }
 
+    public static LoginResult GetAuthInfoFromUser(CorrelationID crid, ILogger? logger, Guid userId, ImmutableList<Claim> claims)
+    {
+        return BuildLoginResult(claims, Session.RexDatabase.GetAuthInfoFromUser(crid, userId));
+    }
+
     /*----------------------------------------------------------------------------
         %%Function: BuildLoginResultFromAuthAndClaimsList
         %%Qualified: tt.Functions.Auth.BuildLoginResultFromAuthAndClaimsList

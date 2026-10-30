@@ -7,6 +7,7 @@ using System.Security.Claims;
 using TCore.Logging;
 using tt.Controllers;
 using tt.Executors;
+using tt.FunctionAuthentication;
 using tt.Model;
 using tt.Types.Model;
 using tt.Types.Model.Auth;
@@ -17,6 +18,25 @@ namespace tt.Functions;
 
 public class AuthFunctions
 {
+    [Authorize(RequiredClaims = [ClaimTypes.NameIdentifier])]
+    [Function("GetAuthInfo")]
+    public async Task<HttpResponseData> GetAuthInfo(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "options", Route = "auth/GetAuthInfo")]
+        HttpRequestData req,
+        FunctionContext context,
+        ILogger? log)
+    {
+        return await Executor.ExecuteGet<LoginResult>(
+            req,
+            context,
+            new CorrelationID(),
+            log,
+            async _context => Auth.GetAuthInfoFromUser(
+                _context.CorrelationId,
+                _context.Logger,
+                _context.UserId!.Value,
+                _context.Claims));
+    }
 
     /*----------------------------------------------------------------------------
         %%Function: Logout

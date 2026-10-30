@@ -101,8 +101,8 @@ public class Auth
     }
 
     /*----------------------------------------------------------------------------
-        %%Function: GetAuthInfoFromUserAndGroup
-        %%Qualified: tt.Database.SqlShared.Auth.GetAuthInfoFromUserAndGroup
+        %%Function: GetAuthInfoFromUser
+        %%Qualified: tt.Database.SqlShared.Auth.GetAuthInfoFromUser
     ----------------------------------------------------------------------------*/
     public static AuthUserEx GetAuthInfoFromUser(ISql sql, CorrelationID crid, Guid userId)
     {
@@ -117,9 +117,7 @@ public class Auth
             {
                 authUserEx.UserId = reader.GetGuid(0);
                 authUserEx.Email = reader.GetString(1);
-                authUserEx.DisplayName = $"{reader.GetString(3)} {reader.GetString(4)}";
-                authUserEx.Claim = reader.GetNullableString(5);
-                authUserEx.ClaimValue = reader.GetNullableString(6);
+                authUserEx.DisplayName = "";
             },
             TtSql.s_SelectBase_AuthUserEx.Aliases,
             (cmd) =>
@@ -127,6 +125,9 @@ public class Auth
                 cmd.AddParameterWithValue("@userId", userId);
             });
 
+        authUserEx.Claim = TtClaimTypes.AssetAccess;
+        authUserEx.ClaimValue = string.Join(",", new[] { TtClaimTypes.Access_Read, TtClaimTypes.Access_Write });
+        
         return authUserEx;
     }
 }

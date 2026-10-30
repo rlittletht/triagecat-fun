@@ -71,7 +71,8 @@ public class Executor
                 context,
                 crid,
                 logger,
-                context.Claims());
+                context.Claims(),
+                Controllers.Claims.GetUserIdFromClaims(context.Claims()));
 
             TBody? body = await GetParamsFromPostBody<TBody>(request, crid, logger);
             TRet ret = await executePost(executorContext, body);
@@ -110,7 +111,8 @@ public class Executor
                 context,
                 crid,
                 logger,
-                context.Claims());
+                context.Claims(),
+                Controllers.Claims.GetUserIdFromClaims(context.Claims()));
 
             TRet ret = await del(executorContext);
             return await BuildResponse(logger, request, ret, customizeResponse);

@@ -36,6 +36,9 @@ public class SqlDatabase: IRexDatabase
     public Guid CreateAuthUserForEmailPassword(CorrelationID crid, string email, string passwordHash) =>
         Auth.CreateAuthUserForEmailPassword(this, crid, email, passwordHash);
 
+    public AuthUserEx GetAuthInfoFromUser(CorrelationID crid, Guid userId) =>
+        Invoke(SqlShared.Auth.GetAuthInfoFromUser, this, crid, userId);
+
     #region Generic Invoke
     // Generic Invocations
     public delegate void VoidInvoke1Del<in T1>(ISql isql, CorrelationID crid, T1 t1);

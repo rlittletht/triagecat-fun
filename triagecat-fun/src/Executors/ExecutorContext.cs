@@ -14,13 +14,15 @@ public class ExecutorContext
     public CorrelationID CorrelationId { get; init; }
     public ILogger? Logger { get; init; }
     public ImmutableList<Claim> Claims { get; init; }
+    public Guid? UserId { get; init; }
 
-    public ExecutorContext(HttpRequestData request, FunctionContext functionContext, CorrelationID correlationId, ILogger? logger, ImmutableList<Claim>? claims)
+    public ExecutorContext(HttpRequestData request, FunctionContext functionContext, CorrelationID correlationId, ILogger? logger, ImmutableList<Claim>? claims, Guid? userId = null)
     {
         Request = request;
         FunctionContext = functionContext;
         CorrelationId = correlationId;
         Logger = logger;
         Claims = claims ?? ImmutableList<Claim>.Empty;
+        UserId = userId;
     }
 }

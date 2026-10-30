@@ -16,6 +16,7 @@ namespace tt.Database;
 
 public interface IRexDatabase
 {
+    public AuthUserEx GetAuthInfoFromUser(CorrelationID crid, Guid userId);
     public List<AuthUserEx> GetAuthAndClaimsForEmail(CorrelationID crid, string email);
     public void UpdatePasswordForUser(CorrelationID crid, string email, string newPasswordHash);
 
