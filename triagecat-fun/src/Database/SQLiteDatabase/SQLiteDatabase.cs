@@ -4,6 +4,7 @@ using TCore.SqlCore;
 using TCore.SQLiteClient;
 using tt.Database.Sql;
 using tt.Model;
+using tt.Types.Model.AssetGroups;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
 using tt.Types.Model.Users;
@@ -47,6 +48,10 @@ public class SQLiteDatabase : IRexDatabase
         SqlShared.Auth.UpdatePasswordForUser(m_connection, crid, email, newPasswordHash);
 
     public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid) => SqlShared.Assets.GetAllAssets(m_connection, crid);
+
+    public void CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup) => SqlShared.AssetGroups.CreateAssetGroup(m_connection, crid, assetGroup);
+    public AssetGroup GetAssetGroup(CorrelationID crid, Guid id) => SqlShared.AssetGroups.GetAssetGroup(m_connection, crid, id);
+    public IReadOnlyCollection<AssetGroup> GetAllAssetGroups(CorrelationID crid) => SqlShared.AssetGroups.GetAllAssetGroups(m_connection, crid);
 
     public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => SqlShared.Assets.AddAssets(m_connection, crid, assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> newValues) => SqlShared.Assets.UpdateAssetItemValues(m_connection, crid, assetId, newValues);

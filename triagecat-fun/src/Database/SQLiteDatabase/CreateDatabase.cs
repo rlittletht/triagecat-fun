@@ -102,6 +102,17 @@ public class CreateDatabase
                 cmd.AddParameterWithValue("@value", string.Join(",", [TtClaimTypes.Access_Read, TtClaimTypes.Access_Write, TtClaimTypes.Access_Create]));
             });
     }
+
+    static void CreateAssetGroupTable(ISql connection)
+    {
+        connection.ExecuteNonQuery(
+            "CREATE TABLE tt_assetgroup ("
+            + "id VARCHAR(36) NOT NULL,"
+            + "name VARCHAR(64) NOT NULL,"
+            + "description VARCHAR(256) NOT NULL,"
+            + "PRIMARY KEY('id'));"
+        );
+    }
     
     /*----------------------------------------------------------------------------
         %%Function: CreateNewDatabase
@@ -117,6 +128,7 @@ public class CreateDatabase
         CreateAssetTable(connection);
         CreateUserPreferencesTable(connection);
         CreateClaimsTable(connection);
+        CreateAssetGroupTable(connection);
 
         return connection;
     }
@@ -143,6 +155,11 @@ public class CreateDatabase
         if (!IsTableDefined(connection, "tt_claims"))
         {
             CreateClaimsTable(connection);
+        }
+
+        if (!IsTableDefined(connection, "tt_assetgroup"))
+        {
+            CreateAssetGroupTable(connection);
         }
     }
 }

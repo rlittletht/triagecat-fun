@@ -2,6 +2,7 @@
 using TCore.Logging;
 using TCore.SqlClient;
 using TCore.SqlCore;
+using tt.Types.Model.AssetGroups;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
 using tt.Types.Model.Users;
@@ -30,6 +31,15 @@ public class SqlDatabase: IRexDatabase
 
     public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid) =>
         Invoke(SqlShared.Assets.GetAllAssets, this, crid);
+
+    public void CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup) =>
+        VoidInvoke(SqlShared.AssetGroups.CreateAssetGroup, this, crid, assetGroup);
+
+    public AssetGroup GetAssetGroup(CorrelationID crid, Guid id) =>
+        Invoke(SqlShared.AssetGroups.GetAssetGroup, this, crid, id);
+
+    public IReadOnlyCollection<AssetGroup> GetAllAssetGroups(CorrelationID crid) =>
+        Invoke(SqlShared.AssetGroups.GetAllAssetGroups, this, crid);
 
     public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => Invoke(SqlShared.Assets.AddAssets, this, crid, assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates) => VoidInvoke(SqlShared.Assets.UpdateAssetItemValues, this, crid, assetId, updates);
