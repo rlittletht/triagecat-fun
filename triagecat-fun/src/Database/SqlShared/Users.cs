@@ -27,13 +27,13 @@ public class Users
 
     public static SqlCommandTextInit s_queryUserPreferences =
         new(
-            "SELECT $$tt_userpreferences$$.id, $$tt_userpreferences$$.visibleRows, $$tt_userpreferences$$.imagesPerPage, $$tt_userpreferences$$.tileSize "
+            "SELECT $$tt_userpreferences$$.id, $$tt_userpreferences$$.imagesPerPage, $$tt_userpreferences$$.tileSize "
             + "FROM $$#tt_userpreferences$$ WHERE $$tt_userpreferences$$.id = @id",
             s_tableAliases);
 
     public static SqlCommandTextInit s_insertUserPreferences =
         new(
-            "INSERT INTO tt_userpreferences (id, visibleRows, imagesPerPage, tileSize) VALUES (@id, @visibleRows, @imagesPerPage, @tileSize)",
+            "INSERT INTO tt_userpreferences (id, imagesPerPage, tileSize) VALUES (@id, @imagesPerPage, @tileSize)",
             s_tableAliases);
 
 #endregion
@@ -60,9 +60,8 @@ public class Users
             s_queryUserPreferences.CommandText,
             (ISqlReader reader, Guid _, ref UserPreferences building) =>
             {
-                building.VisibleRows = reader.GetInt32(1);
-                building.ImagesPerPage = reader.GetInt32(2);
-                building.TileSize = reader.GetInt32(3);
+                building.ImagesPerPage = reader.GetInt32(1);
+                building.TileSize = reader.GetInt32(2);
             },
             s_queryUserPreferences.Aliases,
             cmd => cmd.AddParameterWithValue("@id", userId));
@@ -75,7 +74,6 @@ public class Users
             cmd =>
             {
                 cmd.AddParameterWithValue("@id", userId);
-                cmd.AddParameterWithValue("@visibleRows", userPreferences.VisibleRows);
                 cmd.AddParameterWithValue("@imagesPerPage", userPreferences.ImagesPerPage);
                 cmd.AddParameterWithValue("@tileSize", userPreferences.TileSize);
             });

@@ -19,11 +19,6 @@ public class Users
     {
         Dictionary<string, object?> updates = new Dictionary<string, object?>();
 
-        if (baseUserPreferences.VisibleRows != newUserPreferences.VisibleRows)
-        {
-            updates["visibleRows"] = newUserPreferences.VisibleRows;
-        }
-
         if (baseUserPreferences.ImagesPerPage != newUserPreferences.ImagesPerPage)
         {
             updates["imagesPerPage"] = newUserPreferences.ImagesPerPage;
