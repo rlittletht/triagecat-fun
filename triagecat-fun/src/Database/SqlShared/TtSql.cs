@@ -16,30 +16,14 @@ public static class TtSql
 
     public static SqlCommandTextInit s_SelectBase_AuthUserEx =
         new(
-            "SELECT $$tt_auth$$.userid, $$tt_auth$$.email, $$tt_auth$$.password "
-            + "FROM $$#tt_auth$$ ",
+            "SELECT $$tt_auth$$.userid, $$tt_auth$$.email, $$tt_auth$$.password, "
+            + "$$tt_claims$$.claim, $$tt_claims$$.value "
+            + "FROM $$#tt_auth$$ "
+            + "LEFT OUTER JOIN $$#tt_claims$$ "
+            + "ON $$tt_auth$$.userid = $$tt_claims$$.userid ",
             new TableAliases(
-                new Dictionary<string, string> { { "tt_auth", "AUTH" } })
+                new Dictionary<string, string> { { "tt_auth", "AUTH" }, { "tt_claims", "CLAIMS" } })
         );
-
-    /*----------------------------------------------------------------------------
-        %%Function: BuildInsertAndRetrieveNewId
-        %%Qualified: tr.Model.Types.TrSql.BuildInsertAndRetrieveNewId
-
-        Most of our tables that are keyed by an id have an automatically
-        generated key using newsequentialid().  when we insert, the id
-        is autmatically generated, so we have to retrieve that ID that was
-        created. This function creates that pattern.
-    ----------------------------------------------------------------------------*/
-    public static string BuildInsertAndRetrieveNewId(string insert, string values, string idField)
-    {
-        return string.Concat(
-            $"DECLARE @InsertOutput TABLE ({idField} UNIQUEIDENTIFIER); ",
-            insert,
-            $"OUTPUT INSERTED.{idField} INTO @InsertOutput ",
-            values,
-            $"; SELECT {idField} FROM @InsertOutput");
-    }
 
     /*----------------------------------------------------------------------------
         %%Function: BuildAndExecuteUpdateValuesForId
@@ -96,12 +80,12 @@ public static class TtSql
         StringBuilder sb = new StringBuilder();
         int current = 0;
         int totalCount = 0;
-        
+
         sb.Clear();
         sb.Append(commandBase);
 
         List<Tuple<string, object>> parameters = new List<Tuple<string, object>>();
-        
+
         foreach (T item in items)
         {
             if (current == partLimit)
@@ -110,7 +94,8 @@ public static class TtSql
 
                 if (!string.IsNullOrWhiteSpace(command))
                 {
-                    sql.ExecuteNonQuery(new SqlCommandTextInit(sb.ToString(), aliases),
+                    sql.ExecuteNonQuery(
+                        new SqlCommandTextInit(sb.ToString(), aliases),
                         (cmd) =>
                         {
                             foreach (Tuple<string, object> param in parameters)

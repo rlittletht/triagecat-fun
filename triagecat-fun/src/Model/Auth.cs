@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Immutable;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using TCore.Logging;
+using tt.Controllers;
 using tt.Types.Model;
 using tt.Types.Model.Auth;
 using tt.Types.Wire;
@@ -24,6 +26,9 @@ public class Auth
             email = authUserEx.Email,
             displayName = authUserEx.DisplayName,
             userId = authUserEx.UserId.ToString(),
+            showAddAssets = Controllers.Claims.DoesClaimContain(claims, TtClaimTypes.AssetAccess, TtClaimTypes.Access_Create),
+            showDatabaseRepair = false,
+            allowResetPassword = false
         };
     }
 
@@ -128,7 +133,7 @@ public class Auth
 
     /*----------------------------------------------------------------------------
         %%Function: ChangePassword
-        %%Qualified: tr.Model.Auth.ChangePassword
+        %%Qualified: tt.Model.Auth.ChangePassword
     ----------------------------------------------------------------------------*/
     public static string ChangePassword(CorrelationID crid, ILogger? logger, string email, string? oldPassword, string newPassword)
     {

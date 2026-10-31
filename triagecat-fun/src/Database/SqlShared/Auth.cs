@@ -5,6 +5,7 @@ using tt.Controllers;
 using tt.Database.SqlShared;
 using tt.Types.Model.Auth;
 using tt.Types.Model;
+using tt.Types.Model.Users;
 
 namespace tt.Database.SqlShared;
 
@@ -53,8 +54,8 @@ public class Auth
                         Email = reader.GetString(1),
                         Password = reader.GetString(2),
                         DisplayName = "",
-                        Claim = reader.GetNullableString(5),
-                        ClaimValue = reader.GetNullableString(6)
+                        Claim = reader.GetNullableString(3),
+                        ClaimValue = reader.GetNullableString(4)
                     };
 
                 building.Add(authUserEx);
@@ -65,16 +66,6 @@ public class Auth
                 cmd.AddParameterWithValue("@email", email);
             });
         
-        // every auth'd user gets read and write claims for now
-        if (authAndClaims.Count > 0)
-        {
-            if (authAndClaims.Count != 1)
-                throw new TtException($"auth and claims returned more than 1 result: {authAndClaims.Count}");
-
-            authAndClaims[0].Claim = TtClaimTypes.AssetAccess;
-            authAndClaims[0].ClaimValue = string.Join(",", [TtClaimTypes.Access_Read, TtClaimTypes.Access_Write]);
-        }
-
         return authAndClaims;
     }
 
@@ -130,4 +121,46 @@ public class Auth
         
         return authUserEx;
     }
+
+    /*----------------------------------------------------------------------------
+        %%Function: CreateAuthUserForEmailPassword
+        %%Qualified: tt.Database.SqlShared.Auth.CreateAuthUserForEmailPassword
+    ----------------------------------------------------------------------------*/
+    public static Guid CreateAuthUserForEmailPassword(ISql sql, CorrelationID crid, string email, string passwordHash)
+    {
+        Guid id = RT.Comb.Provider.Sql.Create();
+
+        sql.BeginTransaction();
+        try
+        {
+            SqlShared.Auth.InsertNewAuthUser(sql, crid, id, email, passwordHash);
+
+            SqlShared.Users.CreateUserPreferences(
+                sql,
+                crid,
+                id,
+                new UserPreferences { VisibleRows = Config.VisibleRows, ImagesPerPage = Config.ImagesPerPage });
+            SqlShared.Claims.SetOrUpdateClaimsForUser(
+                sql,
+                crid,
+                id,
+                TtClaimTypes.AssetAccess,
+                string.Join(",", [TtClaimTypes.Access_Write, TtClaimTypes.Access_Read]));
+            SqlShared.Claims.SetOrUpdateClaimsForUser(
+                sql,
+                crid,
+                id,
+                TtClaimTypes.UserProfile,
+                string.Join(",", [TtClaimTypes.Access_Write, TtClaimTypes.Access_Read]));
+        }
+        catch
+        {
+            sql.Rollback();
+            throw;
+        }
+
+        sql.Commit();
+        return id;
+    }
+
 }

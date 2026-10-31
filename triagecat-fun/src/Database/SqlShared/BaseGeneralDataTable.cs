@@ -20,11 +20,12 @@ public class BaseGeneralDataTable<T>
         m_idColumn = idColumn;
     }
 
-    public BaseGeneralDataTable(SqlCommandTextInit queryDataTable, SqlCommandTextInit insertNewItem)
+    public BaseGeneralDataTable(SqlCommandTextInit queryDataTable, SqlCommandTextInit insertNewItem, string idColumn)
     {
         m_queryDataTable = queryDataTable;
         m_insertNewItem = insertNewItem;
         m_deleteItem = null;
+        m_idColumn = idColumn;
     }
 
     /*----------------------------------------------------------------------------

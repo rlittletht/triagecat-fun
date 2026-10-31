@@ -8,38 +8,43 @@ namespace tt.Database.SqlShared;
 
 public class Claims
 {
-    public static SqlCommandTextInit s_insertUserGroupClaim =
-        new("INSERT INTO tr_claims (userid, groupid, claim, value) VALUES (@userid, @groupid, @claim, @value)");
+    public static SqlCommandTextInit s_insertUserClaim =
+        new("INSERT INTO tt_claims (userid, claim, value) VALUES (@userid, @claim, @value)");
 
-    public static SqlCommandTextInit s_deleteUserGroupClaim =
-        new("DELETE FROM tr_claims WHERE userid=@userid AND groupid=@groupid AND claim=@claim");
+    public static SqlCommandTextInit s_deleteUserClaim =
+        new("DELETE FROM tt_claims WHERE userid=@userid AND claim=@claim");
 
     private static TableAliases s_aliases = new TableAliases(
         new Dictionary<string, string>
         {
-            { "tr_claims", "CLM" }
+            { "tt_claims", "CLM" }
         });
 
     // the where will be built by the caller
-    public static SqlCommandTextInit s_queryClaims = new("SELECT $$tr_claims$$.value FROM $$#tr_claims$$", s_aliases);
+    public static SqlCommandTextInit s_queryClaims = new("SELECT $$tt_claims$$.value FROM $$#tt_claims$$", s_aliases);
 
     /*----------------------------------------------------------------------------
         %%Function: SetOrUpdateClaimsForUser
-        %%Qualified: tr.Database.SqlShared.Claims.SetOrUpdateClaimsForUser
+        %%Qualified: tt.Database.SqlShared.Claims.SetOrUpdateClaimsForUser
     ----------------------------------------------------------------------------*/
-    public static void SetOrUpdateClaimsForUser(ISql sql, CorrelationID crid, Guid userId, Guid groupId, string claimType, string? claims)
+    public static void SetOrUpdateClaimsForUser(ISql sql, CorrelationID crid, Guid userId, string claimType, string? claims)
     {
+        bool fStartedTransaction = false;
+        
         try
         {
-            sql.BeginTransaction();
+            if (!sql.InTransaction)
+            {
+                sql.BeginTransaction();
+                fStartedTransaction = true;
+            }
 
             // first delete the existing claim, if any
             sql.ExecuteNonQuery(
-                s_deleteUserGroupClaim,
+                s_deleteUserClaim,
                 cmd =>
                 {
                     cmd.AddParameterWithValue("@userid", userId);
-                    cmd.AddParameterWithValue("@groupid", groupId);
                     cmd.AddParameterWithValue("@claim", claimType);
                 });
 
@@ -47,30 +52,36 @@ public class Claims
             if (claims != null)
             {
                 sql.ExecuteNonQuery(
-                    s_insertUserGroupClaim,
+                    s_insertUserClaim,
                     cmd =>
                     {
                         cmd.AddParameterWithValue("@userid", userId);
-                        cmd.AddParameterWithValue("@groupid", groupId);
                         cmd.AddParameterWithValue("@claim", claimType);
                         cmd.AddParameterWithValue("@value", claims);
                     });
             }
 
-            sql.Commit();
+            if (fStartedTransaction)
+            {
+                sql.Commit();
+            }
         }
         catch
         {
-            sql?.Rollback();
+            if (fStartedTransaction)
+            {
+                sql.Rollback();
+            }
+
             throw;
         }
     }
 
     /*----------------------------------------------------------------------------
         %%Function: GetClaimsForUserGroup
-        %%Qualified: tr.Database.SqlShared.Claims.GetClaimsForUserGroup
+        %%Qualified: tt.Database.SqlShared.Claims.GetClaimsForUser
     ----------------------------------------------------------------------------*/
-    public static string? GetClaimsForUserGroup(ISql sql, CorrelationID crid, Guid userId, Guid groupId, string claimType)
+    public static string? GetClaimsForUser(ISql sql, CorrelationID crid, Guid userId, string claimType)
     {
         try
         {
@@ -78,16 +89,14 @@ public class Claims
 
             SqlSelect select = new SqlSelect(s_queryClaims);
 
-            select.Where.Add("$$tr_claims$$.userid = @userid", SqlWhere.Op.And);
-            select.Where.Add("$$tr_claims$$.groupid = @groupid", SqlWhere.Op.And);
-            select.Where.Add("$$tr_claims$$.claim = @claim", SqlWhere.Op.And);
+            select.Where.Add("$$tt_claims$$.userid = @userid", SqlWhere.Op.And);
+            select.Where.Add("$$tt_claims$$.claim = @claim", SqlWhere.Op.And);
 
             return sql.TExecuteScalar<string>(
                 select.ToCommandTextInit(),
                 cmd =>
                 {
                     cmd.AddParameterWithValue("@userid", userId);
-                    cmd.AddParameterWithValue("@groupid", groupId);
                     cmd.AddParameterWithValue("@claim", claimType);
                 });
         }

@@ -35,7 +35,7 @@ public class SqlDatabase: IRexDatabase
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates) => VoidInvoke(SqlShared.Assets.UpdateAssetItemValues, this, crid, assetId, updates);
 
     public Guid CreateAuthUserForEmailPassword(CorrelationID crid, string email, string passwordHash) =>
-        Auth.CreateAuthUserForEmailPassword(this, crid, email, passwordHash);
+        Invoke(SqlShared.Auth.CreateAuthUserForEmailPassword, this, crid, email, passwordHash);
 
     public AuthUserEx GetAuthInfoFromUser(CorrelationID crid, Guid userId) =>
         Invoke(SqlShared.Auth.GetAuthInfoFromUser, this, crid, userId);

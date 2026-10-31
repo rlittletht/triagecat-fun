@@ -75,6 +75,36 @@ public class CreateDatabase
             });
     }
 
+    static void CreateClaimsTable(ISql connection)
+    {
+        connection.ExecuteNonQuery(
+            "CREATE TABLE tt_claims ("
+            + "userid VARCHAR(36) NOT NULL,"
+            + "claim NVARCHAR(128) NOT NULL,"
+            + "value NVARCHAR(512) NULL,"
+            + "PRIMARY KEY('userid','claim'));");
+
+        SqlCommandTextInit cmdtext = new("INSERT INTO tt_claims (userid, claim, value) VALUES (@userid, @claim, @value)");
+
+        connection.ExecuteNonQuery(
+            cmdtext,
+            cmd =>
+            {
+                cmd.AddParameterWithValue("@userid", SQLiteDatabase.s_rootUserId);
+                cmd.AddParameterWithValue("@claim", TtClaimTypes.AssetAccess);
+                cmd.AddParameterWithValue("@value", string.Join(",", [TtClaimTypes.Access_Read, TtClaimTypes.Access_Write, TtClaimTypes.Access_Create]));
+            });
+
+        connection.ExecuteNonQuery(
+            cmdtext,
+            cmd =>
+            {
+                cmd.AddParameterWithValue("@userid", SQLiteDatabase.s_rootUserId);
+                cmd.AddParameterWithValue("@claim", TtClaimTypes.UserProfile);
+                cmd.AddParameterWithValue("@value", string.Join(",", [TtClaimTypes.Access_Read, TtClaimTypes.Access_Write, TtClaimTypes.Access_Create]));
+            });
+    }
+    
     /*----------------------------------------------------------------------------
         %%Function: CreateNewDatabase
         %%Qualified: tt.Database.SQLiteDatabase.CreateDatabase.CreateNewDatabase
@@ -88,6 +118,7 @@ public class CreateDatabase
         CreateAuthTable(connection);
         CreateAssetTable(connection);
         CreateUserPreferencesTable(connection);
+        CreateClaimsTable(connection);
 
         return connection;
     }
@@ -109,6 +140,11 @@ public class CreateDatabase
         if (!IsTableDefined(connection, "tt_userpreferences"))
         {
             CreateUserPreferencesTable(connection);
+        }
+        
+        if (!IsTableDefined(connection, "tt_claims"))
+        {
+            CreateClaimsTable(connection);
         }
     }
 }
