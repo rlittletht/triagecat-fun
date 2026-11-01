@@ -56,15 +56,15 @@ public class UserAssetStatuses
             });
     }
 
-    public static void UpdateUserAssetStatus(ISql sql, CorrelationID crid, Guid assetId, Guid userId, bool triaged)
+    public static void UpdateUserAssetStatus(ISql sql, CorrelationID crid, UserAssetStatus userAssetStatus)
     {
         sql.ExecuteNonQuery(
             s_updateUserAssetStatus,
             cmd =>
             {
-                cmd.AddParameterWithValue("@assetid", assetId);
-                cmd.AddParameterWithValue("@userid", userId);
-                cmd.AddParameterWithValue("@triaged", triaged);
+                cmd.AddParameterWithValue("@assetid", userAssetStatus.AssetId);
+                cmd.AddParameterWithValue("@userid", userAssetStatus.UserId);
+                cmd.AddParameterWithValue("@triaged", userAssetStatus.Triaged);
             });
     }
 }

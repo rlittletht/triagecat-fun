@@ -31,6 +31,10 @@ public interface IRexDatabase
     public AssetGroup GetAssetGroup(CorrelationID crid, Guid id);
     public IReadOnlyCollection<AssetGroup> GetAllAssetGroups(CorrelationID crid);
 
+    public void CreateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus);
+    public UserAssetStatus GetUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId);
+    public void UpdateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus);
+
     public Guid CreateAuthUserForEmailPassword(CorrelationID crid, string email, string passwordHash);
 
     public void CreateUserPreferences(CorrelationID crid, Guid userId, UserPreferences userPreferences);

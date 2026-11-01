@@ -48,8 +48,8 @@ public class SqlDatabase: IRexDatabase
     public UserAssetStatus GetUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId) =>
         Invoke(SqlShared.UserAssetStatuses.GetUserAssetStatus, this, crid, assetId, userId);
 
-    public void UpdateUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId, bool triaged) =>
-        VoidInvoke(SqlShared.UserAssetStatuses.UpdateUserAssetStatus, this, crid, assetId, userId, triaged);
+    public void UpdateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus) =>
+        VoidInvoke(SqlShared.UserAssetStatuses.UpdateUserAssetStatus, this, crid, userAssetStatus);
 
     public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => Invoke(SqlShared.Assets.AddAssets, this, crid, assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates) => VoidInvoke(SqlShared.Assets.UpdateAssetItemValues, this, crid, assetId, updates);

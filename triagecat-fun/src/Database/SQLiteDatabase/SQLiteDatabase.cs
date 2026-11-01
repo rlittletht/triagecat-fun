@@ -56,7 +56,7 @@ public class SQLiteDatabase : IRexDatabase
 
     public void CreateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus) => SqlShared.UserAssetStatuses.CreateUserAssetStatus(m_connection, crid, userAssetStatus);
     public UserAssetStatus GetUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId) => SqlShared.UserAssetStatuses.GetUserAssetStatus(m_connection, crid, assetId, userId);
-    public void UpdateUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId, bool triaged) => SqlShared.UserAssetStatuses.UpdateUserAssetStatus(m_connection, crid, assetId, userId, triaged);
+    public void UpdateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus) => SqlShared.UserAssetStatuses.UpdateUserAssetStatus(m_connection, crid, userAssetStatus);
 
     public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => SqlShared.Assets.AddAssets(m_connection, crid, assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> newValues) => SqlShared.Assets.UpdateAssetItemValues(m_connection, crid, assetId, newValues);

@@ -119,4 +119,60 @@ public class Assets
 
         return updates.Count;
     }
+
+    public static int UpdateAssetInfoEx(CorrelationID crid, ILogger? logger, Guid userId, UpdateAssetInfoExParams updateParams)
+    {
+        if (updateParams.BaseAsset == null || updateParams.UpdatedAsset == null)
+        {
+            throw new TtExceptionInvalidArgument("Both BaseAsset and UpdatedAsset must be provided.");
+        }
+
+        if (updateParams.BaseAsset.AssetId != updateParams.UpdatedAsset.AssetId)
+        {
+            throw new TtExceptionInvalidArgument("Asset IDs do not match.");
+        }
+
+        Asset baseAsset = new()
+        {
+            AssetId = updateParams.BaseAsset.AssetId,
+            Path = updateParams.BaseAsset.Path,
+            Notes = updateParams.BaseAsset.Notes,
+            Priority = updateParams.BaseAsset.Priority,
+            AssetGroupId = updateParams.BaseAsset.AssetGroupId,
+            AssetGroupName = updateParams.BaseAsset.AssetGroupName
+        };
+
+        Asset updatedAsset = new()
+        {
+            AssetId = updateParams.UpdatedAsset.AssetId,
+            Path = updateParams.UpdatedAsset.Path,
+            Notes = updateParams.UpdatedAsset.Notes,
+            Priority = updateParams.UpdatedAsset.Priority,
+            AssetGroupId = updateParams.UpdatedAsset.AssetGroupId,
+            AssetGroupName = updateParams.UpdatedAsset.AssetGroupName
+        };
+
+        Dictionary<string, object?> updates = BuildUpdateListFromBaseAndNew(baseAsset, updatedAsset);
+        int updateCount = updates.Count;
+
+        if (updates.Count > 0)
+        {
+            Session.RexDatabase.UpdateAssetItemValues(crid, baseAsset.AssetId, updates);
+        }
+
+        if (updateParams.BaseAsset.Triaged != updateParams.UpdatedAsset.Triaged)
+        {
+            tt.Types.Model.UserAssetStatus.UserAssetStatus userAssetStatus = new()
+            {
+                AssetId = baseAsset.AssetId,
+                UserId = userId,
+                Triaged = updateParams.UpdatedAsset.Triaged
+            };
+
+            Session.RexDatabase.UpdateUserAssetStatus(crid, userAssetStatus);
+            updateCount++;
+        }
+
+        return updateCount;
+    }
 }
