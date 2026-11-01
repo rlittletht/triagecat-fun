@@ -1,6 +1,6 @@
 using TCore.Logging;
 using TCore.SqlCore;
-using tt.Types.Model.UserAssetStatus;
+using tt.Types.Model.Assets;
 
 namespace tt.Database.SqlShared;
 
@@ -22,7 +22,7 @@ public class UserAssetStatuses
 
     public static SqlCommandTextInit s_updateUserAssetStatus =
         new(
-            "UPDATE tt_userassetstatus SET triaged = @triaged WHERE assetid = @assetid AND userid = @userid",
+            "UPDATE tt_userassetstatus SET ",
             s_tableAliases);
 
     public static void CreateUserAssetStatus(ISql sql, CorrelationID crid, UserAssetStatus userAssetStatus)
@@ -56,15 +56,8 @@ public class UserAssetStatuses
             });
     }
 
-    public static void UpdateUserAssetStatus(ISql sql, CorrelationID crid, UserAssetStatus userAssetStatus)
+    public static void UpdateUserAssetStatus(ISql sql, CorrelationID crid, Guid assetId, Guid userId, Dictionary<string, object?> newValues)
     {
-        sql.ExecuteNonQuery(
-            s_updateUserAssetStatus,
-            cmd =>
-            {
-                cmd.AddParameterWithValue("@assetid", userAssetStatus.AssetId);
-                cmd.AddParameterWithValue("@userid", userAssetStatus.UserId);
-                cmd.AddParameterWithValue("@triaged", userAssetStatus.Triaged);
-            });
+        TtSql.BuildAndExecuteUpdateValuesForId(sql, crid, s_updateUserAssetStatus.CommandText, ["assetid", "userid"], [assetId, userId], newValues);
     }
 }

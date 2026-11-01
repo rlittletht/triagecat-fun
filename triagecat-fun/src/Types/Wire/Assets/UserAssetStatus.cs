@@ -1,4 +1,4 @@
-namespace tt.Types.Wire.UserAssetStatus;
+namespace tt.Types.Wire.Assets;
 
 public class UserAssetStatus
 {

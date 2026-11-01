@@ -5,7 +5,6 @@ using TCore.SqlCore;
 using tt.Types.Model.AssetGroups;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
-using tt.Types.Model.UserAssetStatus;
 using tt.Types.Model.Users;
 
 namespace tt.Database.Sql;
@@ -51,8 +50,8 @@ public class SqlDatabase: IRexDatabase
     public UserAssetStatus GetUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId) =>
         Invoke(SqlShared.UserAssetStatuses.GetUserAssetStatus, this, crid, assetId, userId);
 
-    public void UpdateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus) =>
-        VoidInvoke(SqlShared.UserAssetStatuses.UpdateUserAssetStatus, this, crid, userAssetStatus);
+    public void UpdateUserAssetStatus(CorrelationID crid, Guid userId, Guid assetId, Dictionary<string, object?> newValues) =>
+        VoidInvoke(SqlShared.UserAssetStatuses.UpdateUserAssetStatus, this, crid, userId, assetId, newValues);
 
     public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => Invoke(SqlShared.Assets.AddAssets, this, crid, assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates) => VoidInvoke(SqlShared.Assets.UpdateAssetItemValues, this, crid, assetId, updates);

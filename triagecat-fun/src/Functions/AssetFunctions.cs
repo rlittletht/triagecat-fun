@@ -131,4 +131,37 @@ public class AssetFunctions
             UpdateAssetAsync);
     }
 
+    /*----------------------------------------------------------------------------
+    %%Function: UpdateAssetAsync
+    %%Qualified: tt.Functions.AssetFunctions.UpdateAssetAsync
+----------------------------------------------------------------------------*/
+    static async Task<int> UpdateUserAssetStatusAsync(
+        ExecutorContext context, Types.Wire.Assets.UpdateUserAssetStatusParams? updateAssetParams)
+    {
+        tt.Types.Model.Assets.UpdateUserAssetStatusParams updateAssetParamsModel = tt.Types.Model.Assets.UpdateUserAssetStatusParams.CreateFromWire(updateAssetParams!);
+
+        return Assets.UpdateUserAssetStatus(context.CorrelationId, context.Logger, updateAssetParamsModel);
+    }
+
+    /*----------------------------------------------------------------------------
+        %%Function: UpdateUserAssetStatus
+        %%Qualified: tt.Functions.AssetFunctions.UpdateUserAssetStatus
+    ----------------------------------------------------------------------------*/
+    [Authorize(
+        RequiredClaims = [TtClaimTypes.AssetAccess, ClaimTypes.NameIdentifier],
+        RequiredClaimValues = [TtClaimTypes.Access_Write])]
+    [Function("UpdateUserAssetStatus")]
+    public async Task<HttpResponseData> UpdateUserAssetStatus(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", "options", Route = "assets/UpdateUserAssetStatus")]
+        HttpRequestData req,
+        FunctionContext context,
+        ILogger? log)
+    {
+        return await Executor.ExecutePost<Types.Wire.Assets.UpdateUserAssetStatusParams, int>(
+            req,
+            context,
+            new CorrelationID(),
+            log,
+            UpdateUserAssetStatusAsync);
+    }
 }

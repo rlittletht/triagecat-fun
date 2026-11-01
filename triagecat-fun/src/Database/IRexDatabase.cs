@@ -12,7 +12,6 @@ using TCore.Logging;
 using tt.Types.Model.AssetGroups;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
-using tt.Types.Model.UserAssetStatus;
 using tt.Types.Model.Users;
 
 namespace tt.Database;
@@ -34,7 +33,7 @@ public interface IRexDatabase
 
     public void CreateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus);
     public UserAssetStatus GetUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId);
-    public void UpdateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus);
+    public void UpdateUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId, Dictionary<string, object?> updates);
 
     public Guid CreateAuthUserForEmailPassword(CorrelationID crid, string email, string passwordHash);
 

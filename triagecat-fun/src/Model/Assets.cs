@@ -25,7 +25,8 @@ public class Assets
         return wireAssets;
     }
 
-    public static IReadOnlyCollection<Types.Wire.Assets.AssetEx> QueryAssets(CorrelationID crid, ILogger? logger, Guid userId, Types.Model.Assets.QueryAsset? queryAsset)
+    public static IReadOnlyCollection<Types.Wire.Assets.AssetEx> QueryAssets(
+        CorrelationID crid, ILogger? logger, Guid userId, Types.Model.Assets.QueryAsset? queryAsset)
     {
         bool? triaged = queryAsset?.Triaged;
         string? assetGroupName = queryAsset?.AssetGroupName;
@@ -56,7 +57,7 @@ public class Assets
                 assetGroupsByName[assetGroup.Name] = assetGroup;
             }
         }
-        
+
         foreach (AddAsset addAsset in addAssets)
         {
             Guid? assetGroupId = null;
@@ -66,11 +67,7 @@ public class Assets
             {
                 if (!assetGroupsByName.TryGetValue(addAsset.AssetGroupName.Trim(), out AssetGroup? assetGroup))
                 {
-                    AssetGroup newGroup = new()
-                                          {
-                                              Name = addAsset.AssetGroupName.Trim(),
-                                              Description = String.Empty
-                                          };
+                    AssetGroup newGroup = new() { Name = addAsset.AssetGroupName.Trim(), Description = String.Empty };
                     newGroup.Id = Session.RexDatabase.CreateAssetGroup(crid, newGroup);
 
                     assetGroupsByName[newGroup.Name] = newGroup;
@@ -80,7 +77,14 @@ public class Assets
                 assetGroupId = assetGroup.Id;
             }
 
-            Asset asset = new() { AssetId = RT.Comb.Provider.Sql.Create(), Path = addAsset.Path, Notes = string.Empty, Priority = 0, AssetGroupId = assetGroupId };
+            Asset asset = new()
+                          {
+                              AssetId = RT.Comb.Provider.Sql.Create(),
+                              Path = addAsset.Path,
+                              Notes = string.Empty,
+                              Priority = 0,
+                              AssetGroupId = assetGroupId
+                          };
             assets.Add(asset);
         }
 
@@ -127,13 +131,67 @@ public class Assets
         }
 
         Dictionary<string, object?> updates = BuildUpdateListFromBaseAndNew(updateParams.BaseAsset!, updateParams.UpdatedAsset!);
-        
+
         if (updates.Count > 0)
         {
             Session.RexDatabase.UpdateAssetItemValues(crid, updateParams.BaseAsset!.AssetId, updates);
         }
 
         return updates.Count;
+    }
+
+    public static Dictionary<string, object?> BuildUpdateListFromBaseAndNewUserAssetStatus(
+        Types.Model.Assets.UserAssetStatus baseStatus, Types.Model.Assets.UserAssetStatus newStatus)
+    {
+        Dictionary<string, object?> updates = new Dictionary<string, object?>();
+
+        if (baseStatus.Triaged != newStatus.Triaged)
+        {
+            updates["Triaged"] = newStatus.Triaged;
+        }
+
+        return updates;
+    }
+
+    public static int UpdateUserAssetStatus(CorrelationID crid, ILogger? logger, UpdateUserAssetStatusParams updateParams)
+    {
+        if (updateParams.BaseUserAssetStatus == null || updateParams.UpdatedUserAssetStatus == null)
+        {
+            throw new TtExceptionInvalidArgument("Both BaseUserAssetStatus and UpdatedUserAssetStatus must be provided.");
+        }
+
+        if (updateParams.BaseUserAssetStatus.AssetId != updateParams.UpdatedUserAssetStatus.AssetId)
+        {
+            throw new TtExceptionInvalidArgument("Asset IDs do not match.");
+        }
+
+        if (updateParams.BaseUserAssetStatus.UserId != updateParams.UpdatedUserAssetStatus.UserId)
+        {
+            throw new TtExceptionInvalidArgument("User IDs do not match.");
+        }
+
+        try
+            // first, make sure the assert status exists
+        {
+            UserAssetStatus existingStatus = Session.RexDatabase.GetUserAssetStatus(
+                crid,
+                updateParams.BaseUserAssetStatus.AssetId,
+                updateParams.BaseUserAssetStatus.UserId);
+
+            // just update, ignore coherency failure
+            Dictionary<string, object?> updates = BuildUpdateListFromBaseAndNewUserAssetStatus(
+                updateParams.BaseUserAssetStatus,
+                updateParams.UpdatedUserAssetStatus);
+
+            Session.RexDatabase.UpdateUserAssetStatus(crid, updateParams.BaseUserAssetStatus.AssetId, updateParams.BaseUserAssetStatus.UserId, updates);
+            return updates.Count;
+        }
+        catch (TCore.SqlCore.SqlExceptionNoResults)
+        {
+            // need to create
+            Session.RexDatabase.CreateUserAssetStatus(crid, updateParams.UpdatedUserAssetStatus);
+            return 1;
+        }
     }
 
     public static int UpdateAssetInfoEx(CorrelationID crid, ILogger? logger, Guid userId, UpdateAssetInfoExParams updateParams)
@@ -149,24 +207,24 @@ public class Assets
         }
 
         Asset baseAsset = new()
-        {
-            AssetId = updateParams.BaseAsset.AssetId,
-            Path = updateParams.BaseAsset.Path,
-            Notes = updateParams.BaseAsset.Notes,
-            Priority = updateParams.BaseAsset.Priority,
-            AssetGroupId = updateParams.BaseAsset.AssetGroupId,
-            AssetGroupName = updateParams.BaseAsset.AssetGroupName
-        };
+                          {
+                              AssetId = updateParams.BaseAsset.AssetId,
+                              Path = updateParams.BaseAsset.Path,
+                              Notes = updateParams.BaseAsset.Notes,
+                              Priority = updateParams.BaseAsset.Priority,
+                              AssetGroupId = updateParams.BaseAsset.AssetGroupId,
+                              AssetGroupName = updateParams.BaseAsset.AssetGroupName
+                          };
 
         Asset updatedAsset = new()
-        {
-            AssetId = updateParams.UpdatedAsset.AssetId,
-            Path = updateParams.UpdatedAsset.Path,
-            Notes = updateParams.UpdatedAsset.Notes,
-            Priority = updateParams.UpdatedAsset.Priority,
-            AssetGroupId = updateParams.UpdatedAsset.AssetGroupId,
-            AssetGroupName = updateParams.UpdatedAsset.AssetGroupName
-        };
+                             {
+                                 AssetId = updateParams.UpdatedAsset.AssetId,
+                                 Path = updateParams.UpdatedAsset.Path,
+                                 Notes = updateParams.UpdatedAsset.Notes,
+                                 Priority = updateParams.UpdatedAsset.Priority,
+                                 AssetGroupId = updateParams.UpdatedAsset.AssetGroupId,
+                                 AssetGroupName = updateParams.UpdatedAsset.AssetGroupName
+                             };
 
         Dictionary<string, object?> updates = BuildUpdateListFromBaseAndNew(baseAsset, updatedAsset);
         int updateCount = updates.Count;
@@ -178,14 +236,15 @@ public class Assets
 
         if (updateParams.BaseAsset.Triaged != updateParams.UpdatedAsset.Triaged)
         {
-            tt.Types.Model.UserAssetStatus.UserAssetStatus userAssetStatus = new()
-            {
-                AssetId = baseAsset.AssetId,
-                UserId = userId,
-                Triaged = updateParams.UpdatedAsset.Triaged
-            };
+            UserAssetStatus userAssetStatusBase = new() { AssetId = baseAsset.AssetId, UserId = userId, Triaged = updateParams.BaseAsset.Triaged };
 
-            Session.RexDatabase.UpdateUserAssetStatus(crid, userAssetStatus);
+            UserAssetStatus userAssetStatusUpdated = new() { AssetId = updatedAsset.AssetId, UserId = userId, Triaged = updateParams.UpdatedAsset.Triaged };
+
+            UpdateUserAssetStatus(
+                crid,
+                logger,
+                new UpdateUserAssetStatusParams() { BaseUserAssetStatus = userAssetStatusBase, UpdatedUserAssetStatus = userAssetStatusUpdated });
+
             updateCount++;
         }
 

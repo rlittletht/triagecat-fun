@@ -25,12 +25,8 @@ public static class TtSql
                 new Dictionary<string, string> { { "tt_auth", "AUTH" }, { "tt_claims", "CLAIMS" } })
         );
 
-    /*----------------------------------------------------------------------------
-        %%Function: BuildAndExecuteUpdateValuesForId
-        %%Qualified: tr.Database.SqlShared.TrSql.BuildAndExecuteUpdateValuesForId
-    ----------------------------------------------------------------------------*/
     public static void BuildAndExecuteUpdateValuesForId(
-        ISql sql, CorrelationID crid, string baseUpdate, string idField, Guid id, Dictionary<string, object?> newValues)
+        ISql sql, CorrelationID crid, string baseUpdate, string[] idFields, Guid[] id, Dictionary<string, object?> newValues)
     {
         if (newValues.Count == 0)
             return;
@@ -48,18 +44,36 @@ public static class TtSql
             updateQuery.Append($"{field} = @{field} ");
         }
 
-        updateQuery.Append($" WHERE {idField}=@id");
+        List<string> idMatch = new();
+        foreach(string idField in idFields)
+        {
+            idMatch.Add($"{idField}=@{idField}");
+        }
+        updateQuery.Append($" WHERE {string.Join(" AND ", idMatch)}");
 
         sql.ExecuteNonQuery(
             updateQuery.ToString(),
             (cmd) =>
             {
-                cmd.AddParameterWithValue("@id", id);
+                for (int i = 0; i < idFields.Length; i++)
+                {
+                    cmd.AddParameterWithValue($"@{idFields[i]}", id[i]);
+                }
                 foreach (string field in newValues.Keys)
                 {
                     cmd.AddParameterWithValue($"@{field}", newValues[field]);
                 }
             });
+    }
+    
+    /*----------------------------------------------------------------------------
+        %%Function: BuildAndExecuteUpdateValuesForId
+        %%Qualified: tr.Database.SqlShared.TrSql.BuildAndExecuteUpdateValuesForId
+    ----------------------------------------------------------------------------*/
+    public static void BuildAndExecuteUpdateValuesForId(
+        ISql sql, CorrelationID crid, string baseUpdate, string idField, Guid id, Dictionary<string, object?> newValues)
+    {
+        BuildAndExecuteUpdateValuesForId(sql, crid, baseUpdate, [idField], [id], newValues);
     }
 
     public struct PartedLineAndParams

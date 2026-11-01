@@ -1,4 +1,4 @@
-namespace tt.Types.Model.UserAssetStatus;
+namespace tt.Types.Model.Assets;
 
 public class UserAssetStatus
 {
@@ -6,14 +6,14 @@ public class UserAssetStatus
     public Guid UserId { get; set; } = Guid.Empty;
     public bool Triaged { get; set; }
 
-    public Wire.UserAssetStatus.UserAssetStatus Wire => new()
+    public Wire.Assets.UserAssetStatus Wire => new()
     {
         assetId = AssetId.ToString(),
         userId = UserId.ToString(),
         triaged = Triaged
     };
 
-    public static UserAssetStatus CreateFromWire(Wire.UserAssetStatus.UserAssetStatus wire)
+    public static UserAssetStatus CreateFromWire(Wire.Assets.UserAssetStatus wire)
     {
         return new UserAssetStatus
         {
