@@ -49,6 +49,7 @@ public class SQLiteDatabase : IRexDatabase
         SqlShared.Auth.UpdatePasswordForUser(m_connection, crid, email, newPasswordHash);
 
     public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid) => SqlShared.Assets.GetAllAssets(m_connection, crid);
+    public IReadOnlyCollection<AssetEx> QueryAssets(CorrelationID crid, Guid userId, bool? triaged, string? assetGroupName) => SqlShared.Assets.QueryAssets(m_connection, crid, userId, triaged, assetGroupName);
 
     public Guid CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup) => SqlShared.AssetGroups.CreateAssetGroup(m_connection, crid, assetGroup);
     public AssetGroup GetAssetGroup(CorrelationID crid, Guid id) => SqlShared.AssetGroups.GetAssetGroup(m_connection, crid, id);

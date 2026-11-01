@@ -25,6 +25,22 @@ public class Assets
         return wireAssets;
     }
 
+    public static IReadOnlyCollection<Types.Wire.Assets.AssetEx> QueryAssets(CorrelationID crid, ILogger? logger, Guid userId, Types.Model.Assets.QueryAsset? queryAsset)
+    {
+        bool? triaged = queryAsset?.Triaged;
+        string? assetGroupName = queryAsset?.AssetGroupName;
+
+        IReadOnlyCollection<Types.Model.Assets.AssetEx> assets = Session.RexDatabase.QueryAssets(crid, userId, triaged, assetGroupName);
+        List<Types.Wire.Assets.AssetEx> wireAssets = new();
+
+        foreach (Types.Model.Assets.AssetEx asset in assets)
+        {
+            wireAssets.Add(asset.Wire);
+        }
+
+        return wireAssets;
+    }
+
 #endregion
 
     public static int AddAssets(CorrelationID crid, ILogger? logger, IEnumerable<Types.Model.Assets.AddAsset> addAssets)

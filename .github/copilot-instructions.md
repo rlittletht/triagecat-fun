@@ -7,8 +7,8 @@ TriageCat is a photo-triage application consisting of:
 - React 18.2 and TypeScript frontend, built with Vite.
 - Fluent UI `@fluentui/react-components` v9.56.
 - C# Azure Functions using the .NET 10 isolated worker.
-- Azure SQL database or SQLite database, abstracted through a database layer
-- Azure Blob Storage for images
+- Azure SQL database or SQLite database, abstracted through a database layer.
+- Azure Blob Storage for images.
 
 ## C# conventions
 
@@ -31,3 +31,5 @@ TriageCat is a photo-triage application consisting of:
 - Avoid unnecessary dependencies.
 - Preserve compatibility with the existing project.
 - Consult the root README.md for additional project architecture and implementation details.
+- When updating triage state, use the `UserAssetStatus` type for extensibility instead of passing primitive triage flags directly to update functions.
+- Prefer building SQL queries with `TCore.SqlCore.SqlSelect` rather than manually assembling SQL query strings.

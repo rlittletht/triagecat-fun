@@ -24,6 +24,7 @@ public interface IRexDatabase
     public void UpdatePasswordForUser(CorrelationID crid, string email, string newPasswordHash);
 
     public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid);
+    public IReadOnlyCollection<AssetEx> QueryAssets(CorrelationID crid, Guid userId, bool? triaged, string? assetGroupName);
     public int AddAssets(CorrelationID crid, IEnumerable<Asset> assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates);
 

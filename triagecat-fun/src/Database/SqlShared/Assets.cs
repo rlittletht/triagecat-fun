@@ -13,13 +13,23 @@ public class Assets
         new Dictionary<string, string>
         {
             { "tt_assets", "TTA" },
-            { "tt_assetgroup", "TAG" }
+            { "tt_assetgroup", "TAG" },
+            { "tt_userassetstatus", "TUAS" }
         });
 
     public static SqlCommandTextInit s_queryAssets =
         new(
             "SELECT $$tt_assets$$.assetid, $$tt_assets$$.path, $$tt_assets$$.notes, $$tt_assets$$.priority, $$tt_assets$$.assetgroupid, $$tt_assetgroup$$.name "
             + "FROM $$#tt_assets$$ LEFT JOIN $$#tt_assetgroup$$ ON $$tt_assets$$.assetgroupid = $$tt_assetgroup$$.id ",
+            s_tableAliases);
+
+    public static SqlCommandTextInit s_queryAssetsEx =
+        new(
+            "SELECT $$tt_assets$$.assetid, $$tt_assets$$.path, $$tt_assets$$.notes, $$tt_assets$$.priority, $$tt_assets$$.assetgroupid, $$tt_assetgroup$$.name, "
+            + "CASE WHEN $$tt_userassetstatus$$.triaged IS NULL THEN 0 WHEN $$tt_userassetstatus$$.triaged = 1 THEN 1 ELSE 0 END "
+            + "FROM $$#tt_assets$$ "
+            + "LEFT JOIN $$#tt_assetgroup$$ ON $$tt_assets$$.assetgroupid = $$tt_assetgroup$$.id "
+            + "LEFT JOIN $$#tt_userassetstatus$$ ON $$tt_assets$$.assetid = $$tt_userassetstatus$$.assetid AND $$tt_userassetstatus$$.userid = @userid ",
             s_tableAliases);
 
 
@@ -58,6 +68,57 @@ public class Assets
                     AssetGroupName = reader.GetNullableString(5)
                 },
             null);
+    }
+
+    public static IReadOnlyCollection<AssetEx> QueryAssets(ISql sql, CorrelationID crid, Guid userId, bool? triaged, string? assetGroupName)
+    {
+        SqlSelect select = new(s_queryAssetsEx);
+
+        if (triaged.HasValue)
+        {
+            select.Where.Add("(CASE WHEN $$tt_userassetstatus$$.triaged IS NULL THEN 0 WHEN $$tt_userassetstatus$$.triaged = 1 THEN 1 ELSE 0 END) = @triaged", SqlWhere.Op.And);
+        }
+
+        if (!string.IsNullOrWhiteSpace(assetGroupName))
+        {
+            select.Where.Add("$$tt_assetgroup$$.name = @assetGroupName", SqlWhere.Op.And);
+        }
+
+        List<AssetEx> assets = sql.ExecuteDelegatedQuery(
+            crid,
+            select.ToString(),
+            (ISqlReader reader, Guid _, ref List<AssetEx> building) =>
+            {
+                AssetEx assetEx = new()
+                {
+                    AssetId = reader.GetGuid(0),
+                    Path = reader.GetString(1),
+                    Notes = reader.GetString(2),
+                    Priority = reader.GetInt32(3),
+                    AssetGroupId = string.IsNullOrWhiteSpace(reader.GetNullableString(4)) ? null : Guid.Parse(reader.GetNullableString(4)!),
+                    AssetGroupName = reader.GetNullableString(5),
+                    Triaged = reader.GetInt32(6) == 1
+                };
+
+                building.Add(assetEx);
+            },
+            s_tableAliases,
+            cmd =>
+            {
+                cmd.AddParameterWithValue("@userid", userId);
+
+                if (triaged.HasValue)
+                {
+                    cmd.AddParameterWithValue("@triaged", triaged.Value ? 1 : 0);
+                }
+
+                if (!string.IsNullOrWhiteSpace(assetGroupName))
+                {
+                    cmd.AddParameterWithValue("@assetGroupName", assetGroupName);
+                }
+            });
+
+        return assets;
     }
 
     public static int AddAssets(ISql sql, CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets)

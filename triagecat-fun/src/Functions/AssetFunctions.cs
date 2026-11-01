@@ -49,6 +49,14 @@ public class AssetFunctions
         return Assets.AddAssets(context.CorrelationId, context.Logger, modelAssets);
     }
 
+    static async Task<IReadOnlyCollection<Types.Wire.Assets.AssetEx>> QueryAssetsAsync(
+        ExecutorContext context, Types.Wire.Assets.QueryAsset? queryAsset)
+    {
+        Types.Model.Assets.QueryAsset? queryAssetModel = queryAsset != null ? Types.Model.Assets.QueryAsset.CreateFromWire(queryAsset) : null;
+
+        return Assets.QueryAssets(context.CorrelationId, context.Logger, context.UserId!.Value, queryAssetModel);
+    }
+
     [Function("AddAssets")]
     [Authorize(
         RequiredClaims = [TtClaimTypes.AssetAccess, ClaimTypes.NameIdentifier],
@@ -67,6 +75,26 @@ public class AssetFunctions
             new CorrelationID(),
             logger,
             AddAssetsAsync);
+    }
+
+    [Function("QueryAssets")]
+    [Authorize(
+        RequiredClaims = [TtClaimTypes.AssetAccess, ClaimTypes.NameIdentifier],
+        RequiredClaimValues = [TtClaimTypes.Access_Read])]
+    public async Task<HttpResponseData> QueryAssets(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", "options", Route = "assets/QueryAssets")]
+        HttpRequestData req,
+        FunctionContext context,
+        ILogger? log)
+    {
+        ILogger? logger = context.GetLogger("TriageCat");
+
+        return await Executor.ExecutePost<Types.Wire.Assets.QueryAsset, IReadOnlyCollection<Types.Wire.Assets.AssetEx>>(
+            req,
+            context,
+            new CorrelationID(),
+            logger,
+            QueryAssetsAsync);
     }
 
     /*----------------------------------------------------------------------------
