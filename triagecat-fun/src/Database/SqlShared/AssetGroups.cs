@@ -26,16 +26,20 @@ public class AssetGroups
             + "FROM $$#tt_assetgroup$$",
             s_tableAliases);
 
-    public static void CreateAssetGroup(ISql sql, CorrelationID crid, AssetGroup assetGroup)
+    public static Guid CreateAssetGroup(ISql sql, CorrelationID crid, AssetGroup assetGroup)
     {
+        Guid id = RT.Comb.Provider.Sql.Create();
+        
         sql.ExecuteNonQuery(
             s_insertAssetGroup,
             cmd =>
             {
-                cmd.AddParameterWithValue("@id", assetGroup.Id);
+                cmd.AddParameterWithValue("@id", id);
                 cmd.AddParameterWithValue("@name", assetGroup.Name);
                 cmd.AddParameterWithValue("@description", assetGroup.Description);
             });
+
+        return id;
     }
 
     public static AssetGroup GetAssetGroup(ISql sql, CorrelationID crid, Guid id)

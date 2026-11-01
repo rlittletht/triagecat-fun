@@ -49,6 +49,7 @@ public class CreateDatabase
             + "path VARCHAR(1024) NOT NULL,"
             + "notes VARCHAR(1024) NOT NULL,"
             + "priority INTEGER NOT NULL, "
+            + "assetgroupid VARCHAR(36) NULL "
             + "PRIMARY KEY('assetid'));");
     }
 

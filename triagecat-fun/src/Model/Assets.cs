@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using TCore.Logging;
+using tt.Types.Model.AssetGroups;
 using tt.Types.Model;
 using tt.Types.Model.Assets;
 
@@ -29,10 +30,41 @@ public class Assets
     public static int AddAssets(CorrelationID crid, ILogger? logger, IEnumerable<Types.Model.Assets.AddAsset> addAssets)
     {
         List<Asset> assets = new();
+        IReadOnlyCollection<AssetGroup> assetGroups = Session.RexDatabase.GetAllAssetGroups(crid);
+        Dictionary<string, AssetGroup> assetGroupsByName = new(StringComparer.OrdinalIgnoreCase);
 
+        foreach (AssetGroup assetGroup in assetGroups)
+        {
+            if (!assetGroupsByName.ContainsKey(assetGroup.Name))
+            {
+                assetGroupsByName[assetGroup.Name] = assetGroup;
+            }
+        }
+        
         foreach (AddAsset addAsset in addAssets)
         {
-            Asset asset = new() { AssetId = RT.Comb.Provider.Sql.Create(), Path = addAsset.Path, Notes = string.Empty, Priority = 0 };
+            Guid? assetGroupId = null;
+            string? assetGroupName = addAsset.AssetGroupName;
+
+            if (!string.IsNullOrWhiteSpace(addAsset.AssetGroupName))
+            {
+                if (!assetGroupsByName.TryGetValue(addAsset.AssetGroupName.Trim(), out AssetGroup? assetGroup))
+                {
+                    AssetGroup newGroup = new()
+                                          {
+                                              Name = addAsset.AssetGroupName.Trim(),
+                                              Description = String.Empty
+                                          };
+                    newGroup.Id = Session.RexDatabase.CreateAssetGroup(crid, newGroup);
+
+                    assetGroupsByName[newGroup.Name] = newGroup;
+                    assetGroup = newGroup;
+                }
+
+                assetGroupId = assetGroup.Id;
+            }
+
+            Asset asset = new() { AssetId = RT.Comb.Provider.Sql.Create(), Path = addAsset.Path, Notes = string.Empty, Priority = 0, AssetGroupId = assetGroupId };
             assets.Add(asset);
         }
 
@@ -56,6 +88,11 @@ public class Assets
         if (baseAsset.Priority != newAsset.Priority)
         {
             updates["Priority"] = newAsset.Priority;
+        }
+
+        if (baseAsset.AssetGroupId != newAsset.AssetGroupId)
+        {
+            updates["assetgroupid"] = newAsset.AssetGroupId?.ToString() ?? (object)DBNull.Value;
         }
 
         return updates;

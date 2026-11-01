@@ -6,4 +6,6 @@ public class Asset
     public string path { get; set; } = string.Empty;
     public string notes { get; set; } = string.Empty;
     public string priority { get; set; } = string.Empty;
+    public string? assetGroupId { get; set; }
+    public string? assetGroupName { get; set; }
 }

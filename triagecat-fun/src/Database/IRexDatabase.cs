@@ -26,7 +26,7 @@ public interface IRexDatabase
     public int AddAssets(CorrelationID crid, IEnumerable<Asset> assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> updates);
 
-    public void CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup);
+    public Guid CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup);
     public AssetGroup GetAssetGroup(CorrelationID crid, Guid id);
     public IReadOnlyCollection<AssetGroup> GetAllAssetGroups(CorrelationID crid);
 

@@ -49,7 +49,7 @@ public class SQLiteDatabase : IRexDatabase
 
     public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid) => SqlShared.Assets.GetAllAssets(m_connection, crid);
 
-    public void CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup) => SqlShared.AssetGroups.CreateAssetGroup(m_connection, crid, assetGroup);
+    public Guid CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup) => SqlShared.AssetGroups.CreateAssetGroup(m_connection, crid, assetGroup);
     public AssetGroup GetAssetGroup(CorrelationID crid, Guid id) => SqlShared.AssetGroups.GetAssetGroup(m_connection, crid, id);
     public IReadOnlyCollection<AssetGroup> GetAllAssetGroups(CorrelationID crid) => SqlShared.AssetGroups.GetAllAssetGroups(m_connection, crid);
 

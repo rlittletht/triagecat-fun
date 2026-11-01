@@ -3,10 +3,11 @@
 public class AddAsset
 {
     public string Path { get; set; } = string.Empty;
+    public string? AssetGroupName { get; set; }
 
     public static AddAsset CreateFromWire(Types.Wire.Assets.AddAsset wire)
     {
-        return new() { Path = wire.path };
+        return new() { Path = wire.path, AssetGroupName = wire.assetGroupName };
     }
 
     public static List<AddAsset> CreateFromWireList(IEnumerable<Types.Wire.Assets.AddAsset> wireList)
