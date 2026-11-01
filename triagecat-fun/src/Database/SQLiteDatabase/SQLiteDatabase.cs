@@ -7,6 +7,7 @@ using tt.Model;
 using tt.Types.Model.AssetGroups;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
+using tt.Types.Model.UserAssetStatus;
 using tt.Types.Model.Users;
 
 namespace tt.Database.SQLiteDatabase;
@@ -52,6 +53,10 @@ public class SQLiteDatabase : IRexDatabase
     public Guid CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup) => SqlShared.AssetGroups.CreateAssetGroup(m_connection, crid, assetGroup);
     public AssetGroup GetAssetGroup(CorrelationID crid, Guid id) => SqlShared.AssetGroups.GetAssetGroup(m_connection, crid, id);
     public IReadOnlyCollection<AssetGroup> GetAllAssetGroups(CorrelationID crid) => SqlShared.AssetGroups.GetAllAssetGroups(m_connection, crid);
+
+    public void CreateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus) => SqlShared.UserAssetStatuses.CreateUserAssetStatus(m_connection, crid, userAssetStatus);
+    public UserAssetStatus GetUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId) => SqlShared.UserAssetStatuses.GetUserAssetStatus(m_connection, crid, assetId, userId);
+    public void UpdateUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId, bool triaged) => SqlShared.UserAssetStatuses.UpdateUserAssetStatus(m_connection, crid, assetId, userId, triaged);
 
     public int AddAssets(CorrelationID crid, IEnumerable<Types.Model.Assets.Asset> assets) => SqlShared.Assets.AddAssets(m_connection, crid, assets);
     public void UpdateAssetItemValues(CorrelationID crid, Guid assetId, Dictionary<string, object?> newValues) => SqlShared.Assets.UpdateAssetItemValues(m_connection, crid, assetId, newValues);

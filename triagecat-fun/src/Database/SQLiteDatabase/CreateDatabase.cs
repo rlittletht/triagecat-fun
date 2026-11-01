@@ -104,6 +104,17 @@ public class CreateDatabase
             });
     }
 
+    static void CreateUserAssetStatusTable(ISql connection)
+    {
+        connection.ExecuteNonQuery(
+            "CREATE TABLE tt_userassetstatus ("
+            + "assetid VARCHAR(36) NOT NULL,"
+            + "userid VARCHAR(36) NOT NULL,"
+            + "triaged BOOLEAN NOT NULL,"
+            + "PRIMARY KEY('assetid', 'userid'));"
+        );
+    }
+
     static void CreateAssetGroupTable(ISql connection)
     {
         connection.ExecuteNonQuery(
@@ -130,6 +141,7 @@ public class CreateDatabase
         CreateUserPreferencesTable(connection);
         CreateClaimsTable(connection);
         CreateAssetGroupTable(connection);
+        CreateUserAssetStatusTable(connection);
 
         return connection;
     }
@@ -161,6 +173,11 @@ public class CreateDatabase
         if (!IsTableDefined(connection, "tt_assetgroup"))
         {
             CreateAssetGroupTable(connection);
+        }
+
+        if (!IsTableDefined(connection, "tt_userassetstatus"))
+        {
+            CreateUserAssetStatusTable(connection);
         }
     }
 }

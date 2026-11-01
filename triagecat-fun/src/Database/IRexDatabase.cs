@@ -12,6 +12,7 @@ using TCore.Logging;
 using tt.Types.Model.AssetGroups;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
+using tt.Types.Model.UserAssetStatus;
 using tt.Types.Model.Users;
 
 namespace tt.Database;
