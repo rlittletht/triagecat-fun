@@ -104,7 +104,7 @@ public class Assets
                     Path = reader.GetString(1),
                     Notes = reader.GetString(2),
                     Priority = reader.GetInt32(3),
-                    AssetGroupId = string.IsNullOrWhiteSpace(reader.GetNullableString(4)) ? null : Guid.Parse(reader.GetString(4)!),
+                    AssetGroupId = reader.IsDBNull(4) ? null : reader.GetGuid(4),
                     AssetGroupName = reader.GetNullableString(5),
                     Triaged = !reader.IsDBNull(6) && reader.GetInt32(6) == 1,
                     Trashed = !reader.IsDBNull(7) && reader.GetInt32(7) == 1
