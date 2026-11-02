@@ -29,4 +29,14 @@ public class AssetGroups
 
         return wireGroups;
     }
+    
+    public static Types.Wire.AssetGroups.AssetGroup CreateAssetGroup(CorrelationID crid, ILogger? logger, CreateAssetGroupParams createParams)
+    {
+        AssetGroup assetGroup = new() { Name = createParams.Name, Description = createParams.Description };
+        Guid guid = Session.RexDatabase.CreateAssetGroup(crid, assetGroup);
+
+        assetGroup.Id = guid;
+        
+        return assetGroup.Wire;
+    }
 }

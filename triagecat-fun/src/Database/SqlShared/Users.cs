@@ -59,7 +59,7 @@ public class Users
             {
                 building.ImagesPerPage = reader.GetInt32(1);
                 building.TileSize = reader.GetInt32(2);
-                building.DefaultFilter = reader.GetNullableString(3) == null ? null : reader.GetString(3);
+                building.DefaultFilter = reader.GetNullableString(3) == null ? "" : reader.GetString(3);
             },
             s_queryUserPreferences.Aliases,
             cmd => cmd.AddParameterWithValue("@id", userId));
