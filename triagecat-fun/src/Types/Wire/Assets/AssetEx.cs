@@ -9,4 +9,5 @@ public class AssetEx
     public string? assetGroupId { get; set; }
     public string? assetGroupName { get; set; }
     public bool triaged { get; set; }
+    public bool trashed { get; set; }
 }

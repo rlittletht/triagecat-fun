@@ -11,12 +11,12 @@ public class UserAssetStatuses
 
     public static SqlCommandTextInit s_insertUserAssetStatus =
         new(
-            "INSERT INTO tt_userassetstatus (assetid, userid, triaged) VALUES (@assetid, @userid, @triaged)",
+            "INSERT INTO tt_userassetstatus (assetid, userid, triaged, trashed) VALUES (@assetid, @userid, @triaged, @trashed)",
             s_tableAliases);
 
     public static SqlCommandTextInit s_queryUserAssetStatus =
         new(
-            "SELECT $$tt_userassetstatus$$.assetid, $$tt_userassetstatus$$.userid, $$tt_userassetstatus$$.triaged "
+            "SELECT $$tt_userassetstatus$$.assetid, $$tt_userassetstatus$$.userid, $$tt_userassetstatus$$.triaged, $$tt_userassetstatus$$.trashed "
             + "FROM $$#tt_userassetstatus$$ WHERE $$tt_userassetstatus$$.assetid = @assetid AND $$tt_userassetstatus$$.userid = @userid",
             s_tableAliases);
 
@@ -34,6 +34,7 @@ public class UserAssetStatuses
                 cmd.AddParameterWithValue("@assetid", userAssetStatus.AssetId);
                 cmd.AddParameterWithValue("@userid", userAssetStatus.UserId);
                 cmd.AddParameterWithValue("@triaged", userAssetStatus.Triaged);
+                cmd.AddParameterWithValue("@trashed", userAssetStatus.Trashed);
             });
     }
 
@@ -47,6 +48,7 @@ public class UserAssetStatuses
                 building.AssetId = reader.GetGuid(0);
                 building.UserId = reader.GetGuid(1);
                 building.Triaged = reader.GetInt32(2) != 0;
+                building.Trashed = reader.GetInt32(3) != 0;
             },
             s_queryUserAssetStatus.Aliases,
             cmd =>

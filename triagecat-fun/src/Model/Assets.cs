@@ -30,8 +30,9 @@ public class Assets
     {
         bool? triaged = queryAsset?.Triaged;
         string? assetGroupName = queryAsset?.AssetGroupName;
+        bool? trashed = queryAsset?.Trashed;
 
-        IReadOnlyCollection<Types.Model.Assets.AssetEx> assets = Session.RexDatabase.QueryAssets(crid, userId, triaged, assetGroupName);
+        IReadOnlyCollection<Types.Model.Assets.AssetEx> assets = Session.RexDatabase.QueryAssets(crid, userId, triaged, trashed, assetGroupName);
         List<Types.Wire.Assets.AssetEx> wireAssets = new();
 
         foreach (Types.Model.Assets.AssetEx asset in assets)
@@ -150,6 +151,11 @@ public class Assets
             updates["Triaged"] = newStatus.Triaged;
         }
 
+        if (baseStatus.Trashed != newStatus.Trashed)
+        {
+            updates["Trashed"] = newStatus.Trashed;
+        }
+
         return updates;
     }
 
@@ -236,9 +242,21 @@ public class Assets
 
         if (updateParams.BaseAsset.Triaged != updateParams.UpdatedAsset.Triaged)
         {
-            UserAssetStatus userAssetStatusBase = new() { AssetId = baseAsset.AssetId, UserId = userId, Triaged = updateParams.BaseAsset.Triaged };
+            UserAssetStatus userAssetStatusBase = new()
+                                                  {
+                                                      AssetId = baseAsset.AssetId,
+                                                      UserId = userId,
+                                                      Triaged = updateParams.BaseAsset.Triaged,
+                                                      Trashed = updateParams.BaseAsset.Trashed
+                                                  };
 
-            UserAssetStatus userAssetStatusUpdated = new() { AssetId = updatedAsset.AssetId, UserId = userId, Triaged = updateParams.UpdatedAsset.Triaged };
+            UserAssetStatus userAssetStatusUpdated = new()
+                                                     {
+                                                         AssetId = updatedAsset.AssetId,
+                                                         UserId = userId,
+                                                         Triaged = updateParams.UpdatedAsset.Triaged,
+                                                         Trashed = updateParams.UpdatedAsset.Trashed
+                                                     };
 
             UpdateUserAssetStatus(
                 crid,

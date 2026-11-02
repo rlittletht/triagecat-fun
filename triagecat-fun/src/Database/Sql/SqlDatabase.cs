@@ -32,8 +32,8 @@ public class SqlDatabase: IRexDatabase
     public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid) =>
         Invoke(SqlShared.Assets.GetAllAssets, this, crid);
 
-    public IReadOnlyCollection<AssetEx> QueryAssets(CorrelationID crid, Guid userId, bool? triaged, string? assetGroupName) =>
-        Invoke(SqlShared.Assets.QueryAssets, this, crid, userId, triaged, assetGroupName);
+    public IReadOnlyCollection<AssetEx> QueryAssets(CorrelationID crid, Guid userId, bool? triaged, bool? trashed, string? assetGroupName) =>
+        Invoke(SqlShared.Assets.QueryAssets, this, crid, userId, triaged, trashed, assetGroupName);
 
     public Guid CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup) =>
         Invoke(SqlShared.AssetGroups.CreateAssetGroup, this, crid, assetGroup);

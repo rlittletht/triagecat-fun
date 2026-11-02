@@ -139,7 +139,7 @@ public class Auth
                 sql,
                 crid,
                 id,
-                new UserPreferences { ImagesPerPage = Config.ImagesPerPage, TileSize = Config.TileSize });
+                new UserPreferences { ImagesPerPage = Config.ImagesPerPage, TileSize = Config.TileSize, DefaultFilter = "Untriaged" });
             SqlShared.Claims.SetOrUpdateClaimsForUser(
                 sql,
                 crid,

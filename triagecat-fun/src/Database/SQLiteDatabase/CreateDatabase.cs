@@ -111,6 +111,7 @@ public class CreateDatabase
             + "assetid VARCHAR(36) NOT NULL,"
             + "userid VARCHAR(36) NOT NULL,"
             + "triaged BOOLEAN NOT NULL,"
+            + "trashed BOOLEAN NOT NULL,"
             + "PRIMARY KEY('assetid', 'userid'));"
         );
     }

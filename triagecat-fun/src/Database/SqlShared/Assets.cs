@@ -26,7 +26,8 @@ public class Assets
     public static SqlCommandTextInit s_queryAssetsEx =
         new(
             "SELECT $$tt_assets$$.assetid, $$tt_assets$$.path, $$tt_assets$$.notes, $$tt_assets$$.priority, $$tt_assets$$.assetgroupid, $$tt_assetgroup$$.name, "
-            + "CASE WHEN $$tt_userassetstatus$$.triaged IS NULL THEN 0 WHEN $$tt_userassetstatus$$.triaged = 1 THEN 1 ELSE 0 END "
+            + "CASE WHEN $$tt_userassetstatus$$.triaged IS NULL THEN 0 WHEN $$tt_userassetstatus$$.triaged = 1 THEN 1 ELSE 0 END, "
+            + "CASE WHEN $$tt_userassetstatus$$.trashed IS NULL THEN 0 WHEN $$tt_userassetstatus$$.trashed= 1 THEN 1 ELSE 0 END "
             + "FROM $$#tt_assets$$ "
             + "LEFT JOIN $$#tt_assetgroup$$ ON $$tt_assets$$.assetgroupid = $$tt_assetgroup$$.id "
             + "LEFT JOIN $$#tt_userassetstatus$$ ON $$tt_assets$$.assetid = $$tt_userassetstatus$$.assetid AND $$tt_userassetstatus$$.userid = @userid ",
@@ -70,7 +71,7 @@ public class Assets
             null);
     }
 
-    public static IReadOnlyCollection<AssetEx> QueryAssets(ISql sql, CorrelationID crid, Guid userId, bool? triaged, string? assetGroupName)
+    public static IReadOnlyCollection<AssetEx> QueryAssets(ISql sql, CorrelationID crid, Guid userId, bool? triaged, bool? trashed, string? assetGroupName)
     {
         SqlSelect select = new(s_queryAssetsEx);
 
@@ -79,6 +80,13 @@ public class Assets
             select.Where.Add("(CASE WHEN $$tt_userassetstatus$$.triaged IS NULL THEN 0 WHEN $$tt_userassetstatus$$.triaged = 1 THEN 1 ELSE 0 END) = @triaged", SqlWhere.Op.And);
         }
 
+        if (trashed.HasValue)
+        {
+            select.Where.Add(
+                "(CASE WHEN $$tt_userassetstatus$$.trashed IS NULL THEN 0 WHEN $$tt_userassetstatus$$.trashed = 1 THEN 1 ELSE 0 END) = @trashed",
+                SqlWhere.Op.And);
+        }
+        
         if (!string.IsNullOrWhiteSpace(assetGroupName))
         {
             select.Where.Add("$$tt_assetgroup$$.name = @assetGroupName", SqlWhere.Op.And);
@@ -95,9 +103,10 @@ public class Assets
                     Path = reader.GetString(1),
                     Notes = reader.GetString(2),
                     Priority = reader.GetInt32(3),
-                    AssetGroupId = string.IsNullOrWhiteSpace(reader.GetNullableString(4)) ? null : Guid.Parse(reader.GetNullableString(4)!),
+                    AssetGroupId = string.IsNullOrWhiteSpace(reader.GetNullableString(4)) ? null : Guid.Parse(reader.GetString(4)!),
                     AssetGroupName = reader.GetNullableString(5),
-                    Triaged = reader.GetInt32(6) == 1
+                    Triaged = !reader.IsDBNull(6) && reader.GetInt32(6) == 1,
+                    Trashed = !reader.IsDBNull(7) && reader.GetInt32(7) == 1
                 };
 
                 building.Add(assetEx);
@@ -112,6 +121,11 @@ public class Assets
                     cmd.AddParameterWithValue("@triaged", triaged.Value ? 1 : 0);
                 }
 
+                if (trashed.HasValue)
+                {
+                    cmd.AddParameterWithValue("@trashed", trashed.Value ? 1 : 0);
+                }
+                
                 if (!string.IsNullOrWhiteSpace(assetGroupName))
                 {
                     cmd.AddParameterWithValue("@assetGroupName", assetGroupName);

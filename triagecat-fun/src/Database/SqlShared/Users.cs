@@ -16,24 +16,21 @@ public class Users
 #region Query Definitions
 
     public static TableAliases s_tableAliases = new TableAliases(
-        new Dictionary<string, string>
-        {
-            { "tt_auth", "AUTH" },
-            { "tt_userpreferences", "TUP" }
-        });
+        new Dictionary<string, string> { { "tt_auth", "AUTH" }, { "tt_userpreferences", "TUP" } });
 
     public static SqlCommandTextInit s_queryUserIdScalar =
         new("SELECT $$tt_auth$$.userId FROM $$#tt_auth$$ WHERE $$tt_auth$$.email = @email", s_tableAliases);
 
     public static SqlCommandTextInit s_queryUserPreferences =
         new(
-            "SELECT $$tt_userpreferences$$.id, $$tt_userpreferences$$.imagesPerPage, $$tt_userpreferences$$.tileSize "
+            "SELECT $$tt_userpreferences$$.id, $$tt_userpreferences$$.imagesPerPage, $$tt_userpreferences$$.tileSize, "
+            + "$$tt_userpreferences$$.defaultFilter "
             + "FROM $$#tt_userpreferences$$ WHERE $$tt_userpreferences$$.id = @id",
             s_tableAliases);
 
     public static SqlCommandTextInit s_insertUserPreferences =
         new(
-            "INSERT INTO tt_userpreferences (id, imagesPerPage, tileSize) VALUES (@id, @imagesPerPage, @tileSize)",
+            "INSERT INTO tt_userpreferences (id, imagesPerPage, tileSize, defaultFilter) VALUES (@id, @imagesPerPage, @tileSize, @defaultFilter)",
             s_tableAliases);
 
 #endregion
@@ -62,6 +59,7 @@ public class Users
             {
                 building.ImagesPerPage = reader.GetInt32(1);
                 building.TileSize = reader.GetInt32(2);
+                building.DefaultFilter = reader.GetNullableString(3) == null ? null : reader.GetString(3);
             },
             s_queryUserPreferences.Aliases,
             cmd => cmd.AddParameterWithValue("@id", userId));
@@ -76,6 +74,7 @@ public class Users
                 cmd.AddParameterWithValue("@id", userId);
                 cmd.AddParameterWithValue("@imagesPerPage", userPreferences.ImagesPerPage);
                 cmd.AddParameterWithValue("@tileSize", userPreferences.TileSize);
+                cmd.AddParameterWithValue("@defaultFilter", userPreferences.DefaultFilter);
             });
     }
 

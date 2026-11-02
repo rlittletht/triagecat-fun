@@ -5,12 +5,14 @@ public class UserAssetStatus
     public Guid AssetId { get; set; } = Guid.Empty;
     public Guid UserId { get; set; } = Guid.Empty;
     public bool Triaged { get; set; }
+    public bool Trashed { get; set; }
 
     public Wire.Assets.UserAssetStatus Wire => new()
     {
         assetId = AssetId.ToString(),
         userId = UserId.ToString(),
-        triaged = Triaged
+        triaged = Triaged,
+        trashed = Trashed
     };
 
     public static UserAssetStatus CreateFromWire(Wire.Assets.UserAssetStatus wire)
@@ -19,7 +21,8 @@ public class UserAssetStatus
         {
             AssetId = Guid.Parse(wire.assetId),
             UserId = Guid.Parse(wire.userId),
-            Triaged = wire.triaged
+            Triaged = wire.triaged,
+            Trashed = wire.trashed
         };
     }
 }

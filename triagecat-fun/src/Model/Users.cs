@@ -28,6 +28,11 @@ public class Users
         {
             updates["tileSize"] = newUserPreferences.TileSize;
         }
+
+        if (baseUserPreferences.DefaultFilter != newUserPreferences.DefaultFilter)
+        {
+            updates["defaultFilter"] = newUserPreferences.DefaultFilter;
+        }
         return updates;
     }
 

@@ -9,6 +9,7 @@ public class AssetEx
     public Guid? AssetGroupId { get; set; }
     public string? AssetGroupName { get; set; }
     public bool Triaged { get; set; }
+    public bool Trashed { get; set; }
 
     public Wire.Assets.AssetEx Wire => new()
     {
@@ -18,7 +19,8 @@ public class AssetEx
         priority = Priority.ToString(),
         assetGroupId = AssetGroupId?.ToString(),
         assetGroupName = AssetGroupName,
-        triaged = Triaged
+        triaged = Triaged,
+        trashed = Trashed
     };
 
     public static AssetEx CreateFromWire(Wire.Assets.AssetEx wire)
@@ -31,7 +33,8 @@ public class AssetEx
             Priority = int.Parse(wire.priority),
             AssetGroupId = string.IsNullOrWhiteSpace(wire.assetGroupId) ? null : Guid.Parse(wire.assetGroupId),
             AssetGroupName = wire.assetGroupName,
-            Triaged = wire.triaged
+            Triaged = wire.triaged,
+            Trashed = wire.trashed
         };
     }
 
