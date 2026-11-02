@@ -92,7 +92,8 @@ public class Assets
             select.Where.Add("$$tt_assetgroup$$.name = @assetGroupName", SqlWhere.Op.And);
         }
 
-        List<AssetEx> assets = sql.ExecuteDelegatedQuery(
+        select.AddOrderBy("$$tt_assetgroup$$.name, $$tt_assets$$.path");
+        List <AssetEx> assets = sql.ExecuteDelegatedQuery(
             crid,
             select.ToString(),
             (ISqlReader reader, Guid _, ref List<AssetEx> building) =>
