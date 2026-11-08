@@ -82,7 +82,7 @@ public class Assets
                           {
                               AssetId = RT.Comb.Provider.Sql.Create(),
                               Path = addAsset.Path,
-                              Notes = string.Empty,
+                              Notes = addAsset.Notes ?? "",
                               Priority = 0,
                               AssetGroupId = assetGroupId
                           };

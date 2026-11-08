@@ -153,7 +153,7 @@ public class Assets
                                         new Tuple<string, object>($"@path{index}", asset.Path),
                                         new Tuple<string, object>($"@notes{index}", asset.Notes),
                                         new Tuple<string, object>($"@priority{index}", asset.Priority),
-                                        new Tuple<string, object>($"@assetgroupid{index}", asset.AssetGroupId?.ToString() ?? (object)DBNull.Value)
+                                        new Tuple<string, object>($"@assetgroupid{index}", asset.AssetGroupId ?? (object)DBNull.Value)
                                     }
                        };
             },

@@ -4,10 +4,11 @@ public class AddAsset
 {
     public string Path { get; set; } = string.Empty;
     public string? AssetGroupName { get; set; }
+    public string? Notes { get; set; }
 
     public static AddAsset CreateFromWire(Types.Wire.Assets.AddAsset wire)
     {
-        return new() { Path = wire.path, AssetGroupName = wire.assetGroupName };
+        return new() { Path = wire.path, AssetGroupName = wire.assetGroupName, Notes = wire.notes };
     }
 
     public static List<AddAsset> CreateFromWireList(IEnumerable<Types.Wire.Assets.AddAsset> wireList)
@@ -17,6 +18,7 @@ public class AddAsset
         {
             modelAssets.Add(CreateFromWire(wire));
         }
+
         return modelAssets;
     }
 }
