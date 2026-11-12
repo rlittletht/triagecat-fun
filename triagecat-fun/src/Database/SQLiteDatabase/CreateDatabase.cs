@@ -126,6 +126,17 @@ public class CreateDatabase
             + "PRIMARY KEY('id'));"
         );
     }
+
+    static void CreateAssetTransformationsTable(ISql connection)
+    {
+        connection.ExecuteNonQuery(
+            "CREATE TABLE tt_assettransformations ("
+            + "id VARCHAR(36) NOT NULL,"
+            + "transformation NVARCHAR(64) NOT NULL,"
+            + "value NVARCHAR(64) NOT NULL,"
+            + "PRIMARY KEY('id', 'transformation'));"
+        );
+    }
     
     /*----------------------------------------------------------------------------
         %%Function: CreateNewDatabase
@@ -143,6 +154,7 @@ public class CreateDatabase
         CreateClaimsTable(connection);
         CreateAssetGroupTable(connection);
         CreateUserAssetStatusTable(connection);
+        CreateAssetTransformationsTable(connection);
 
         return connection;
     }
@@ -179,6 +191,11 @@ public class CreateDatabase
         if (!IsTableDefined(connection, "tt_userassetstatus"))
         {
             CreateUserAssetStatusTable(connection);
+        }
+
+        if (!IsTableDefined(connection, "tt_assettransformations"))
+        {
+            CreateAssetTransformationsTable(connection);
         }
     }
 }

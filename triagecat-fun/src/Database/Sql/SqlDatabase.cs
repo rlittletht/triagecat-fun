@@ -3,6 +3,7 @@ using TCore.Logging;
 using TCore.SqlClient;
 using TCore.SqlCore;
 using tt.Types.Model.AssetGroups;
+using tt.Types.Model.AssetTransformations;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
 using tt.Types.Model.Users;
@@ -33,7 +34,7 @@ public class SqlDatabase: IRexDatabase
         Invoke(SqlShared.Assets.GetAllAssets, this, crid);
 
     public IReadOnlyCollection<AssetEx> QueryAssets(CorrelationID crid, Guid userId, bool? triaged, bool? trashed, string? assetGroupName) =>
-        Invoke(SqlShared.Assets.QueryAssets, this, crid, userId, triaged, trashed, assetGroupName);
+        Invoke(SqlShared.Assets.QueryAssets, this, crid, userId, triaged, trashed, assetGroupName, Database.Sql.Assets.s_queryAssetsEx);
 
     public Guid CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup) =>
         Invoke(SqlShared.AssetGroups.CreateAssetGroup, this, crid, assetGroup);
@@ -43,6 +44,9 @@ public class SqlDatabase: IRexDatabase
 
     public IReadOnlyCollection<AssetGroup> GetAllAssetGroups(CorrelationID crid) =>
         Invoke(SqlShared.AssetGroups.GetAllAssetGroups, this, crid);
+
+    public void SetAssetTransformation(CorrelationID crid, AssetTransformation assetTransformation) =>
+        VoidInvoke(Transformations.SetAssetTransformation, this, crid, assetTransformation);
 
     public void CreateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus) =>
         VoidInvoke(SqlShared.UserAssetStatuses.CreateUserAssetStatus, this, crid, userAssetStatus);

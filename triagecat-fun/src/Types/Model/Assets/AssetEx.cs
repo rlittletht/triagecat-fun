@@ -1,3 +1,5 @@
+using tt.Types.Model.AssetTransformations;
+
 namespace tt.Types.Model.Assets;
 
 public class AssetEx
@@ -10,18 +12,19 @@ public class AssetEx
     public string? AssetGroupName { get; set; }
     public bool Triaged { get; set; }
     public bool Trashed { get; set; }
-
+    public AssetTransformation[] AssetTransformations { get; set; } = Array.Empty<AssetTransformation>();
     public Wire.Assets.AssetEx Wire => new()
-    {
-        assetId = AssetId.ToString(),
-        path = Path,
-        notes = Notes,
-        priority = Priority.ToString(),
-        assetGroupId = AssetGroupId?.ToString(),
-        assetGroupName = AssetGroupName,
-        triaged = Triaged,
-        trashed = Trashed
-    };
+                                       {
+                                           assetId = AssetId.ToString(),
+                                           path = Path,
+                                           notes = Notes,
+                                           priority = Priority.ToString(),
+                                           assetGroupId = AssetGroupId?.ToString(),
+                                           assetGroupName = AssetGroupName,
+                                           triaged = Triaged,
+                                           trashed = Trashed,
+                                           assetTransformations = AssetTransformation.CreateFromModelList(AssetTransformations)
+                                       };
 
     public static AssetEx CreateFromWire(Wire.Assets.AssetEx wire)
     {
@@ -34,7 +37,8 @@ public class AssetEx
             AssetGroupId = string.IsNullOrWhiteSpace(wire.assetGroupId) ? null : Guid.Parse(wire.assetGroupId),
             AssetGroupName = wire.assetGroupName,
             Triaged = wire.triaged,
-            Trashed = wire.trashed
+            Trashed = wire.trashed,
+            AssetTransformations = AssetTransformation.CreateFromWireList(wire.assetTransformations)
         };
     }
 

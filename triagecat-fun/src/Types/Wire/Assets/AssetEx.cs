@@ -10,4 +10,5 @@ public class AssetEx
     public string? assetGroupName { get; set; }
     public bool triaged { get; set; }
     public bool trashed { get; set; }
+    public Wire.AssetTransformations.AssetTransformation[] assetTransformations { get; set; } = Array.Empty<Wire.AssetTransformations.AssetTransformation>();
 }

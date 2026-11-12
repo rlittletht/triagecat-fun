@@ -10,6 +10,7 @@
 
 using TCore.Logging;
 using tt.Types.Model.AssetGroups;
+using tt.Types.Model.AssetTransformations;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
 using tt.Types.Model.Users;
@@ -30,6 +31,7 @@ public interface IRexDatabase
     public Guid CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup);
     public AssetGroup GetAssetGroup(CorrelationID crid, Guid id);
     public IReadOnlyCollection<AssetGroup> GetAllAssetGroups(CorrelationID crid);
+    public void SetAssetTransformation(CorrelationID crid, AssetTransformation assetTransformation);
 
     public void CreateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus);
     public UserAssetStatus GetUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId);

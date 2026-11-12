@@ -5,6 +5,7 @@ using TCore.SQLiteClient;
 using tt.Database.Sql;
 using tt.Model;
 using tt.Types.Model.AssetGroups;
+using tt.Types.Model.AssetTransformations;
 using tt.Types.Model.Auth;
 using tt.Types.Model.Assets;
 using tt.Types.Model.Users;
@@ -48,11 +49,13 @@ public class SQLiteDatabase : IRexDatabase
         SqlShared.Auth.UpdatePasswordForUser(m_connection, crid, email, newPasswordHash);
 
     public IReadOnlyCollection<Asset> GetAllAssets(CorrelationID crid) => SqlShared.Assets.GetAllAssets(m_connection, crid);
-    public IReadOnlyCollection<AssetEx> QueryAssets(CorrelationID crid, Guid userId, bool? triaged, bool? trashed, string? assetGroupName) => SqlShared.Assets.QueryAssets(m_connection, crid, userId, triaged, trashed, assetGroupName);
+    public IReadOnlyCollection<AssetEx> QueryAssets(CorrelationID crid, Guid userId, bool? triaged, bool? trashed, string? assetGroupName) => SqlShared.Assets.QueryAssets(m_connection, crid, userId, triaged, trashed, assetGroupName,
+        Database.SQLiteDatabase.Assets.s_queryAssetsEx);
 
     public Guid CreateAssetGroup(CorrelationID crid, AssetGroup assetGroup) => SqlShared.AssetGroups.CreateAssetGroup(m_connection, crid, assetGroup);
     public AssetGroup GetAssetGroup(CorrelationID crid, Guid id) => SqlShared.AssetGroups.GetAssetGroup(m_connection, crid, id);
     public IReadOnlyCollection<AssetGroup> GetAllAssetGroups(CorrelationID crid) => SqlShared.AssetGroups.GetAllAssetGroups(m_connection, crid);
+    public void SetAssetTransformation(CorrelationID crid, AssetTransformation assetTransformation) => Transformations.SetAssetTransformation(m_connection, crid, assetTransformation);
 
     public void CreateUserAssetStatus(CorrelationID crid, UserAssetStatus userAssetStatus) => SqlShared.UserAssetStatuses.CreateUserAssetStatus(m_connection, crid, userAssetStatus);
     public UserAssetStatus GetUserAssetStatus(CorrelationID crid, Guid assetId, Guid userId) => SqlShared.UserAssetStatuses.GetUserAssetStatus(m_connection, crid, assetId, userId);

@@ -1,7 +1,10 @@
-﻿using System.Data.SQLite;
+﻿using Newtonsoft.Json;
+using NUnit.Framework.Constraints;
+using System.Data.SQLite;
 using TCore.Logging;
 using TCore.SqlCore;
 using tt.Types.Model.Assets;
+using tt.Types.Model.AssetTransformations;
 
 namespace tt.Database.SqlShared;
 
@@ -10,12 +13,7 @@ public class Assets
 #region Queries
 
     public static TableAliases s_tableAliases = new TableAliases(
-        new Dictionary<string, string>
-        {
-            { "tt_assets", "TTA" },
-            { "tt_assetgroup", "TAG" },
-            { "tt_userassetstatus", "TUAS" }
-        });
+        new Dictionary<string, string> { { "tt_assets", "TTA" }, { "tt_assetgroup", "TAG" }, { "tt_userassetstatus", "TUAS" } });
 
     public static SqlCommandTextInit s_queryAssets =
         new(
@@ -71,13 +69,22 @@ public class Assets
             null);
     }
 
-    public static IReadOnlyCollection<AssetEx> QueryAssets(ISql sql, CorrelationID crid, Guid userId, bool? triaged, bool? trashed, string? assetGroupName)
+    class TransformationJsonItem
     {
-        SqlSelect select = new(s_queryAssetsEx);
+        public string transformation { get; set; } = string.Empty;
+        public string value { get; set; } = string.Empty;
+    }
+
+    public static IReadOnlyCollection<AssetEx> QueryAssets(
+        ISql sql, CorrelationID crid, Guid userId, bool? triaged, bool? trashed, string? assetGroupName, SqlCommandTextInit querySqlCommand)
+    {
+        SqlSelect select = new(querySqlCommand);
 
         if (triaged.HasValue)
         {
-            select.Where.Add("(CASE WHEN $$tt_userassetstatus$$.triaged IS NULL THEN 0 WHEN $$tt_userassetstatus$$.triaged = 1 THEN 1 ELSE 0 END) = @triaged", SqlWhere.Op.And);
+            select.Where.Add(
+                "(CASE WHEN $$tt_userassetstatus$$.triaged IS NULL THEN 0 WHEN $$tt_userassetstatus$$.triaged = 1 THEN 1 ELSE 0 END) = @triaged",
+                SqlWhere.Op.And);
         }
 
         if (trashed.HasValue)
@@ -86,29 +93,44 @@ public class Assets
                 "(CASE WHEN $$tt_userassetstatus$$.trashed IS NULL THEN 0 WHEN $$tt_userassetstatus$$.trashed = 1 THEN 1 ELSE 0 END) = @trashed",
                 SqlWhere.Op.And);
         }
-        
+
         if (!string.IsNullOrWhiteSpace(assetGroupName))
         {
             select.Where.Add("$$tt_assetgroup$$.name = @assetGroupName", SqlWhere.Op.And);
         }
 
+        JsonSerializer json = JsonSerializer.Create();
+
         select.AddOrderBy("$$tt_assetgroup$$.name, $$tt_assets$$.path");
-        List <AssetEx> assets = sql.ExecuteDelegatedQuery(
+        List<AssetEx> assets = sql.ExecuteDelegatedQuery(
             crid,
             select.ToString(),
             (ISqlReader reader, Guid _, ref List<AssetEx> building) =>
             {
-                AssetEx assetEx = new()
+                List<AssetTransformation> transformations = new List<AssetTransformation>();
+                if (!reader.IsDBNull(8))
                 {
-                    AssetId = reader.GetGuid(0),
-                    Path = reader.GetString(1),
-                    Notes = reader.GetString(2),
-                    Priority = reader.GetInt32(3),
-                    AssetGroupId = reader.IsDBNull(4) ? null : reader.GetGuid(4),
-                    AssetGroupName = reader.GetNullableString(5),
-                    Triaged = !reader.IsDBNull(6) && reader.GetInt32(6) == 1,
-                    Trashed = !reader.IsDBNull(7) && reader.GetInt32(7) == 1
-                };
+                    List<TransformationJsonItem> items = JsonConvert.DeserializeObject<List<TransformationJsonItem>>(reader.GetString(8))
+                        ?? new List<TransformationJsonItem>();
+
+                    foreach (TransformationJsonItem item in items)
+                    {
+                        transformations.Add(new AssetTransformation { Id = reader.GetGuid(0), Transformation = item.transformation, Value = item.value });
+                    }
+                }
+
+                AssetEx assetEx = new()
+                                  {
+                                      AssetId = reader.GetGuid(0),
+                                      Path = reader.GetString(1),
+                                      Notes = reader.GetString(2),
+                                      Priority = reader.GetInt32(3),
+                                      AssetGroupId = reader.IsDBNull(4) ? null : reader.GetGuid(4),
+                                      AssetGroupName = reader.GetNullableString(5),
+                                      Triaged = !reader.IsDBNull(6) && reader.GetInt32(6) == 1,
+                                      Trashed = !reader.IsDBNull(7) && reader.GetInt32(7) == 1,
+                                      AssetTransformations = transformations.ToArray()
+                                  };
 
                 building.Add(assetEx);
             },
@@ -126,7 +148,7 @@ public class Assets
                 {
                     cmd.AddParameterWithValue("@trashed", trashed.Value ? 1 : 0);
                 }
-                
+
                 if (!string.IsNullOrWhiteSpace(assetGroupName))
                 {
                     cmd.AddParameterWithValue("@assetGroupName", assetGroupName);
